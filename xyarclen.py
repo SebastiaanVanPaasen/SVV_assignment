@@ -11,6 +11,7 @@ stotal=pi*17.3/4+sqrt(((48.4-17.3/2))**2+(17.3/2)**2)
 xlist=[]
 ylist=[]
 def xyarclen(r,s,ca):
+    #Calculates x and y coordinates as function of airfoil arclength starting from LE
     if s>=0 and s<=pi*r/2:
         x=r*(1-cos(s/r))
         y=r*sin(s/r)
