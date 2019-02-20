@@ -30,9 +30,6 @@ class Force:
         self.magnitude = magnitude
         self.direction = direction
         self.position = position
-#        self.x = magnitude*direction[0]
-#        self.y = magnitude*direction[1]
-#        self.z = magnitude*direction[2]
 
     def determine_force(self, direction):
         determinator = 0
@@ -73,16 +70,21 @@ q_ = Force(q*l_a, np.array([0, -1, 0]), np.array([l_a/2, 0, 0]))
 p_ = Force(p, np.array([0, 0, -1]), np.array([x_a2, y_a1, z_a1]))
 
 forces = [y_1, y_2, y_3, z_1, z_2, z_3, a_1, q_, p_]
-#system = []
+
 sum_forces_y = []
 sum_forces_z = []
-sum_moments = []
+#sum_moments = []
+sum_moments_x = []
+sum_moments_y = []
+sum_moments_z = []
 
 for force in forces:
     sum_forces_y.append(force.determine_force('y'))
     sum_forces_z.append(force.determine_force('z'))
-    sum_moments.append(force.determine_moment([0, 0, 0]))
-
+    sum_moments_x.append(force.determine_moment([0, 0, 0])[0])
+    sum_moments_y.append(force.determine_moment([0, 0, 0])[1])
+    sum_moments_z.append(force.determine_moment([0, 0, 0])[2])
+    
 #print(sum_forces_y)
 #print(sum_forces_z)
 #print(sum_moments)
@@ -98,34 +100,17 @@ ce_eq_y = np.array([0.,0.,0.,(l_a - x_1)**3/3,
                     (l_a - x_a1)**3/3 - (x_1+x_a1)*(l_a - x_a1)**2/2 + x_1*x_a1*(l_a - x_a1),
                     (l_a - x_a2)**3/3 - (x_1+x_a2)*(l_a - x_a2)**2/2 + x_1*x_a2*(l_a - x_a2),0.])
 
-#system.append(sum_forces_y)
-#system.append(sum_forces_z)
-#for j in range(3):
-#    for i in range(len(sum_moments)):
-#        system.append(sum_moments[i][j])
-#system.append(ce_eq_y)
-#system.append(ce_eq_z)
+system = [sum_forces_y, sum_forces_z, sum_moments_x, sum_moments_y, sum_moments_z, ce_eq_y, ce_eq_z]
 
 #solving reaction forces
-a = np.zeros((7,7))
+sys_mat = np.zeros((7,7))
 unk = np.zeros(7)
-b = np.zeros(7)
-
-for i in range(7):
-    a[0][i] = sum_forces_y[i]
-    a[1][i] = sum_forces_z[i]
-    a[2][i] = sum_moments[i][0]
-    a[3][i] = sum_moments[i][1]
-    a[4][i] = sum_moments[i][2]
-    a[5][i] = ce_eq_y[i]
-    a[6][i] = ce_eq_z[i]
+sys_vec = np.zeros(7)
+for i in range(len(system)):
+    for j in range(len(system[0])-2):
+        sys_mat[i][j] = system[i][j]
+    sys_vec[i] = system[i][-1] + system[i][-2]
     
-b[0] = sum_forces_y[-1] + sum_forces_y[-2]
-b[1] = sum_forces_z[-1] + sum_forces_z[-2]
-b[2] = sum_moments[0][-1] + sum_moments[0][-2]
-b[3] = sum_moments[1][-1] + sum_moments[1][-2]
-b[4] = sum_moments[2][-1] + sum_moments[2][-2]
-b[5] = ce_eq_y[-1] + ce_eq_y[-2]
-b[6] = ce_eq_z[-1] + ce_eq_z[-2]
-
-unk = np.linalg.solve(a,b)
+unk = np.linalg.solve(sys_mat,sys_vec)
+for i in range(len(forces)-2):
+    forces[i].magnitude *= unk[i]
