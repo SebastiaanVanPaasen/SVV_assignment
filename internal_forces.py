@@ -1,4 +1,5 @@
 import numpy as np
+from SVV_assignment.SVV_assignment.geometric_properties import *
 
 # aileron parameters
 l_a = 1.691
@@ -21,7 +22,10 @@ x_a2 = x_2 + x_a/2
 # load parameters
 q = 2710
 p = 37900
-E = 1
+E = 73.1*10**9
+G = 28*10**9
+I_zz, I_yy = main()
+delta_1 = 0.00681
 
 
 class Force:
