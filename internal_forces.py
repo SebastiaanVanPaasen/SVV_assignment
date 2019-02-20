@@ -53,7 +53,6 @@ class Force:
 
         return moments
 
-
 y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
 y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
 y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
@@ -75,13 +74,31 @@ for force in forces:
     sum_forces_z.append(force.determine_force('z'))
     sum_moments.append(force.determine_moment([0, 0, 0]))
 
-print(sum_forces_y)
-print(sum_forces_z)
-print(sum_moments)
+#print(sum_forces_y)
+#print(sum_forces_z)
+#print(sum_moments)
 
 ce_eq_z = np.array([(l_a - x_1)**3/3, (l_a - x_2)**3/3 - (x_1+x_2)*(l_a - x_2)**2/2 + x_1*x_2*(l_a - x_2), (l_a - x_3)**3/3 - (x_1)])
 
-ce_eq_y = np.array([(l_a - x_1)**3/3, (l_a - x_a1)**3/3 - (x_1+x_a1)*(l_a - x_a1)**2/2 + x_1*x_a1*(l_a - x_a1),
+ce_eq_y = np.array([0,0,0,(l_a - x_1)**3/3,
                     (l_a - x_2)**3/3 - (x_1+x_2)*(l_a - x_2)**2/2 + x_1*x_2*(l_a - x_2),
-                    (l_a - x_a2)**3/3 - (x_1+x_a2)*(l_a - x_a2)**2/2 + x_1*x_a2*(l_a - x_a2),
-                    (l_a - x_3)**3/3 - (x_1+x_3)*(l_a - x_3)**2/2 + x_1*x_3*(l_a - x_3)])
+                    (l_a - x_3)**3/3 - (x_1+x_3)*(l_a - x_3)**2/2 + x_1*x_3*(l_a - x_3),
+                    (l_a - x_a1)**3/3 - (x_1+x_a1)*(l_a - x_a1)**2/2 + x_1*x_a1*(l_a - x_a1),
+                    (l_a - x_a2)**3/3 - (x_1+x_a2)*(l_a - x_a2)**2/2 + x_1*x_a2*(l_a - x_a2),0])
+    
+
+
+#solving reaction forces
+a = np.zeros((7,7))
+unk = np.zeros(7)
+b = np.zeros(7)
+
+for i in range(7):
+    a[0][i] = sum_forces_y[i]
+    a[1][i] = sum_forces_z[i]
+    a[2][i] = sum_moments[i][0]
+    a[3][i] = sum_moments[i][1]
+    a[4][i] = sum_moments[i][2]
+#    a[5][i] = ce_eq_y[i]
+#    a[6][i] = ce_eq_z[i]
+    
