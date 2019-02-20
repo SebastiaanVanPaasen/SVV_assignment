@@ -79,7 +79,7 @@ print(sum_forces_y)
 print(sum_forces_z)
 print(sum_moments)
 
-ce_eq = np.array([(l_a - x_1)**3/3, (l_a - x_2)**3/3 - (x_1+x_2)*(l_a - x_2)**2/2 + x_1*x_2*(l_a - x_2), (l_a - x_3)**3/3 - (x_1)])
+ce_eq_z = np.array([(l_a - x_1)**3/3, (l_a - x_2)**3/3 - (x_1+x_2)*(l_a - x_2)**2/2 + x_1*x_2*(l_a - x_2), (l_a - x_3)**3/3 - (x_1)])
 
 ce_eq_y = np.array([(l_a - x_1)**3/3, (l_a - x_a1)**3/3 - (x_1+x_a1)*(l_a - x_a1)**2/2 + x_1*x_a1*(l_a - x_a1),
                     (l_a - x_2)**3/3 - (x_1+x_2)*(l_a - x_2)**2/2 + x_1*x_2*(l_a - x_2),
