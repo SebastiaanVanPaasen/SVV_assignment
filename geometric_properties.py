@@ -158,21 +158,21 @@ def main():
     a_spar = 0.0025 * 0.173
     n_discretize = 601  # only ODD integer, 13<n<600 [contour_length/w_stiffner]
     boom_areas_y, y_pos_booms, z_pos_booms, boom_areas_z = boom_area(aileron, stiffner, a_spar, n_discretize)
-    for i in range(len(boom_areas_z)):
-        plt.scatter(y_pos_booms[i], z_pos_booms[i], s=60 * boom_areas_z[i] / max(boom_areas_z), color="blue",
-                    label="around y axis")
-    for i in range(len(z_pos_booms)):
-        z_pos_booms[i] = z_pos_booms[i] + h_aileron * 1.2
-    for i in range(len(boom_areas_y)):
-        plt.scatter(y_pos_booms[i], z_pos_booms[i], s=60 * boom_areas_y[i] / max(boom_areas_y), color="red",
-                    label="around z' axis")
-    plt.axis('equal')
+    # for i in range(len(boom_areas_z)):
+    #     plt.scatter(y_pos_booms[i], z_pos_booms[i], s=60 * boom_areas_z[i] / max(boom_areas_z), color="blue",
+    #                 label="around y axis")
+    # for i in range(len(z_pos_booms)):
+    #     z_pos_booms[i] = z_pos_booms[i] + h_aileron * 1.2
+    # for i in range(len(boom_areas_y)):
+    #     plt.scatter(y_pos_booms[i], z_pos_booms[i], s=60 * boom_areas_y[i] / max(boom_areas_y), color="red",
+    #                 label="around z' axis")
+    # plt.axis('equal')
     Izz = moi(boom_areas_z, z_pos_booms)
     Iyy = moi(boom_areas_y, y_pos_booms)
     print("Izz: " + str(Izz))
     print("Iyy: " + str(Iyy))
     plt.show()
-    return Izz, Iyy
+    return
 
 
 def read_table(filename):  # tables must be in form: 1 row header (description), separation by tabulators
@@ -183,7 +183,7 @@ def read_table(filename):  # tables must be in form: 1 row header (description),
     del file[0]
     for line in file:
         l = line.split('\t')
-    floatt, floatps1, floatps2 = [], [], []
+
 
     for i in (ps1, ps2, t):
         del i[0]
@@ -195,21 +195,3 @@ def read_table(filename):  # tables must be in form: 1 row header (description),
 
 
 main()
-
-# STILL TESTING, SORINS PROGRAM DOES NOT WORK COMPLETLY SO IM ADJUSTING IT TOMORROW (map_s_to_yz)
-#
-# yl=[]
-# zl=[]
-# for i in np.linspace(0.,2*(np.pi * 0.173 / 4 + np.sqrt((0.484 - 0.173 / 2) ** 2 + (0.173 / 2) ** 2)),100):
-#     y,z = map_s_to_yz(i, 0.173, 0.484)
-#     yl.append(y)
-#     zl.append(z)
-#
-# plt.scatter(yl, zl)
-# y,z=map_s_to_yz(np.pi * 0.173 / 4,  0.173, 0.484)
-# plt.scatter(y,z,c="red")
-# y,z=map_s_to_yz(np.pi * 0.173 / 4 + np.sqrt((0.484 - 0.173 / 2) ** 2 + (0.173 / 2) ** 2),  0.173, 0.484)
-# plt.scatter(y,z,c="green")
-# plt.scatter(0.173 / 2,0.173 / 2,c="black")
-# plt.axis('equal')
-# plt.show()
