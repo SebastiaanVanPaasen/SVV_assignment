@@ -9,8 +9,8 @@ from math import *
 import numpy as np
 
 'Needed parameters'
-Vz = 5.0
-Iyy = 6.0
+Vy = 5.0
+Izz = 6.0
 boomarea = [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0]
 boomy = [0.0, 3.0, 5.0, 4.0, 3.5, 3.0, 2.33, 1.66, 1.0, 0.5, -0.5, -1.0, -1.66, -2.33, -3.0, -3.5, -4.0, -5.0, -3.0]
 AI = 2.0
@@ -26,7 +26,7 @@ x = 0.1
 LI = 2.0*pi*(h/2.0)*(1.0/8.0)
 LII = sqrt((h/2.0)**2 + (Ca-h/2.0)**2)
 
-f = -(Vz/Iyy)
+f = -(Vy/Izz)
 
 #QB
 qb23   = 0.0
@@ -87,22 +87,3 @@ q1718 = qb1718 + mtxsol[1]
 q1819 = qb1819 + mtxsol[0]
 q119  = qb119  + mtxsol[0]
 q318  = qb318  + mtxsol[0] - mtxsol[1]
-
-
-
-#TESTING
-
-#boom = np.array([1, 2, 3, 4, 5, 6, 7])
-#z = np.array([[3],
-#              [4],
-#              [2],
-#              [6],
-#              [1],
-#              [0],
-#              [2]])
-
-#result = np.zeros((7,1))
-
-# iterate through rows of X
-#for i in range(len(boom)):
-#       result[i] += boom[i] * z[(i,0)]
