@@ -36,6 +36,8 @@ class Force:
         self.magnitude = magnitude
         self.direction = direction
         self.position = position
+        self.x = self.magnitude*self.direction
+
 
     def determine_force(self, direction):
         determinator = 0
@@ -73,10 +75,12 @@ z_2 = Force(1, np.array([0, 0, 1]), np.array([x_2, 0, 0]))
 z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
 a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
 a_1z = Force(1, np.array([0, 0, 1]), np.array([x_a1, y_a1, z_a1]))
+#TODO: decompose the forces below into the corresponding tilted axis
 p_y = Force(p, np.array([0, -1, 0]), np.array([x_a2, y_a1, z_a1]))
 p_z = Force(p, np.array([0, 0, -1]), np.array([x_a2, y_a1, z_a1]))
 q_y = Force(q*l_a, np.array([0, -1, 0]), np.array([l_a/2, 0, 0]))
 q_z = Force(q*l_a, np.array([0, 0, 1]), np.array([l_a/2, 0, 0]))
+
 forces = [y_1, y_2, y_3, z_1, z_2, z_3, a_1y, a_1z, p_y, p_z, q_y, q_z]
 
 #forces = [R_1, R_2, R_3, R_I, p, q]
@@ -138,8 +142,10 @@ sys_vec = np.zeros(8)
 for i in range(len(system)):
     for j in range(len(system[0])-4):
         sys_mat[i][j] = system[i][j]
-    sys_vec[i] = np.sum(system[i][len(system)+1:]) #TODO: adding the deflection term d1 and d3 for sys_vec[-2] and sys_vec[-1]
+    sys_vec[i] = -1*np.sum(system[i][len(system):]) #TODO: adding the deflection term d1 and d3 for sys_vec[-2] and sys_vec[-1]
     
 unk = np.linalg.solve(sys_mat,sys_vec)
 for i in range(len(forces)-4):
-    forces[i].magnitude *= unk[i]
+    forces[i].magnitude *= unk[i] #TODO: make magnitude positive and the direction according to the correct sign
+
+
