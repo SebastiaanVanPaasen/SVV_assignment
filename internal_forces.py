@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 #from SVV_assignment.SVV_assignment.geometric_properties import *
 import geometric_properties
 # aileron parameters
@@ -66,7 +67,7 @@ class Force:
         self.direction[1] = self.direction[1]*np.sin(angle)
         self.direction[2] = self.direction[2]*np.cos(angle)
         
-        
+#def calc_reaction_forces():  THIS ONE
 y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
 y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
 y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
@@ -98,13 +99,13 @@ for force in forces:
     sum_moments_x.append(force.determine_moment([0, 0, 0])[0])
     sum_moments_y.append(force.determine_moment([0, 0, 0])[1])
     sum_moments_z.append(force.determine_moment([0, 0, 0])[2])
-    
+
 #print(sum_forces_y)
 #print(sum_forces_z)
 #print(sum_moments)
 
 ce_eq_z_1 = np.array([(l_a - x_1)**3/3,
-                    (l_a - x_2)**3/3 - (x_1+x_2)*(l_a - x_2)**2/2 + x_1*x_2*(l_a - x_2), 
+                    (l_a - x_2)**3/3 - (x_1+x_2)*(l_a - x_2)**2/2 + x_1*x_2*(l_a - x_2),
                     (l_a - x_3)**3/3 - (x_1+x_3)*(l_a - x_3)**2/2 + x_1*x_3*(l_a - x_3),
                     0.,0.,0.,
                     (l_a - x_a1)**3/3 - (x_1+x_a1)*(l_a - x_a1)**2/2 + x_1*x_a1*(l_a - x_a1),
@@ -143,9 +144,70 @@ for i in range(len(system)):
     for j in range(len(system[0])-4):
         sys_mat[i][j] = system[i][j]
     sys_vec[i] = -1*np.sum(system[i][len(system):]) #TODO: adding the deflection term d1 and d3 for sys_vec[-2] and sys_vec[-1]
-    
+
 unk = np.linalg.solve(sys_mat,sys_vec)
 for i in range(len(forces)-4):
     forces[i].magnitude *= unk[i] #TODO: make magnitude positive and the direction according to the correct sign
 
+#return forces  ENDS HERE
 
+class Slice():
+
+    def __init__(self, x, dx):
+        self.x = x
+        self.dx = dx
+        self.vx = 0. #Force(1., np.array([1,0,0]), np.array([x, 0, 0]))
+        self.vy = 0. #Force(1., np.array([0,1,0]), np.array([x, 0, 0]))
+        self.vz = 0. #Force(1., np.array([0,1,0]), np.array([x, 0, 0]))
+        self.mx = 0.
+        self.my = 0.
+        self.mz = 0.
+        self.dy = 0.
+        
+        
+    def int_dist(self, applied_forces, l_a):
+        ext_forces = []
+        for i in [-2,-1]:
+            applied_forces[i].magnitude *= self.x/l_a
+            applied_forces[i].position[0] *= self.x/l_a
+        
+        for i in range(len(applied_forces)):
+            if applied_forces[i].position[0] < self.x:
+                ext_forces.append(applied_forces[i])
+        for i in range(len(ext_forces)):
+            self.vx += -1*ext_forces[i].determine_force('x')
+            self.vy += -1*ext_forces[i].determine_force('y')
+            self.vz += -1*ext_forces[i].determine_force('z')
+            self.mx += -1*ext_forces[i].determine_moment([self.x,0,0])[0]
+            self.my += -1*ext_forces[i].determine_moment([self.x,0,0])[1]
+            self.mz += -1*ext_forces[i].determine_moment([self.x,0,0])[2]
+        
+        return applied_forces
+    
+    #def macauley(self):
+        
+            
+#def distribution(forces, bc1, bc2, l_a, dx):
+x_bound = []
+for i in range(len(forces)):
+    if forces[i].position[0] != l_a/2:
+        x_bound.append(forces[i].position[0])
+x_bound = (list(set(x_bound)))
+x_bound.sort()
+
+
+dx = 0.001
+x_slice = np.arange(0,l_a+dx, dx)
+total_n = len(x_slice)
+v_y = np.zeros(total_n)
+v_z = np.zeros(total_n)
+m_z = np.zeros(total_n)
+
+slice_list= []
+for i in range(total_n):
+    slice_list.append(Slice(x_slice[i],dx))
+    slice_list[i].int_dist(forces,l_a)
+    v_y[i] = slice_list[i].vy
+    m_z[i] = slice_list[i].mz
+
+plt.plot(x_slice,v_y)
