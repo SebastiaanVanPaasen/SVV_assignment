@@ -32,11 +32,12 @@ class Idealization:
 
         for i in range(self.n_boom):
             z, y, quadrant = self._map_s_to_yz(s)
-            print("the coordinates are (z, y) : " + str(z), " " + str(y), " " + str(quadrant))
+            # print("the coordinates are (z, y) : " + str(z), " " + str(y), " " + str(quadrant))
             booms.append([z, y])
             distances.append(s)
             s += distance
 
+        distances.append(distance * self.n_boom)
         return booms, distances
 
     def _map_s_to_yz(self, s):
@@ -89,8 +90,8 @@ class Idealization:
 
         for i in range(len(booms)):
             if booms[i][0] > self.h_a / 2:
-                n_top_spar = i - 1
-                print("top spar after " + str(i - 1))
+                n_top_spar = i
+                print("top spar at " + str(i + 1))
                 break
 
         booms = booms[:n_top_spar] + [[self.h_a / 2, self.h_a / 2]] + booms[n_top_spar:]
@@ -117,12 +118,14 @@ class Idealization:
 
         for i in range(len(booms)):
             if booms[i][1] < 0 and booms[i][0] < self.h_a / 2:
-                n_bottom_spar = i - 1
-                print("bottom spar after " + str(i - 1))
+                n_bottom_spar = i
+                print("bottom spar at " + str(i + 1))
                 break
 
         booms = booms[:n_bottom_spar] + [[self.h_a / 2, -self.h_a / 2]] + booms[n_bottom_spar:]
-        distances = distances[:n_bottom_spar] + [np.pi * self.h_a / 4] + distances[n_bottom_spar:]
+        distances = distances[:n_bottom_spar] + [
+            np.pi * self.h_a / 4 + 2 * np.sqrt((self.h_a / 2) ** 2 + (self.c_a - (self.h_a / 2)) ** 2)] + distances[
+                                                                                                          n_bottom_spar:]
 
         area_before_top_spar = self.t_skin * distance / 6 * (
                 2 + booms[n_bottom_spar - 2][1] / booms[n_bottom_spar - 1][1]) + \
@@ -146,7 +149,7 @@ class Idealization:
         boom_areas = boom_areas[:n_bottom_spar - 1] + [area_before_top_spar] + [area_top_spar] + [
             area_after_top_spar] + boom_areas[n_bottom_spar + 1:]
 
-        return booms, distances, boom_areas
+        return booms, distances, boom_areas, n_top_spar, n_bottom_spar
 
     def calculate_boom_area(self, booms):
         boom_areas = []
@@ -196,17 +199,19 @@ b, d = ideal.set_boom_locations()
 
 areas = ideal.calculate_boom_area(b)
 
-b, d, areas = ideal.add_spar_booms(b, d, areas)
+b, d, areas, top, bottom = ideal.add_spar_booms(b, d, areas)
 
 z_pos, b = ideal.calculate_cg(b, areas)
 
 i_zz, i_yy = ideal.calculate_moi(b, areas)
 
+# def plotting(booms):
+#     for i in range(len(booms)):
+#         plt.scatter(booms[i][0], booms[i][1], color= 'blue', label="Cross-section")
+#
+#     plt.show()
+#
+# plotting(b)
 
-def plotting(booms):
-    for i in range(len(booms)):
-        plt.scatter(booms[i][0], booms[i][1], color= 'blue', label="Cross-section")
-
-    plt.show()
-
-plotting(b)
+print(top)
+print(bottom)
