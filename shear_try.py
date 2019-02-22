@@ -1,11 +1,21 @@
 import numpy as np
-from SVV_assignment.SVV_assignment.geometric_properties import main
+from SVV_assignment.SVV_assignment.geometry import Idealization as Idealization
 
-Izz, B, z, y, s = main()
-print(y*1000)
+ideal = Idealization(200)
+
+b, d = ideal.set_boom_locations()
+
+areas = ideal.calculate_boom_area(b)
+
+b, d, areas = ideal.add_spar_booms(b, d, areas)
+
+z_pos, b = ideal.calculate_cg(b, areas)
+
+i_zz, i_yy = ideal.calculate_moi(b, areas)
+
+
 h_a = 0.173
 c_a = 0.484
-z = -1 * (z + h_a / 4)
 
 n_I = 149
 n_spar = 75
@@ -26,19 +36,21 @@ t_I[-1] = t_spar
 t_II[-1] = t_spar
 
 
-def q_b(booms, y_coordinates, moi):
+def q_b(booms, a, moi):
     diff_q = np.zeros(len(booms))
 
     alpha = -1 / moi
     value = 0
     for i in range(len(booms)):
-        delta_q = alpha * booms[i] * y_coordinates[i]
+        delta_q = alpha * booms[i][1] * a[i]
         value += delta_q
         diff_q[i] = value
 
     base_q = np.zeros(len(booms) - 1)
+    start = 0
     for i in range(len(diff_q) - 1):
-        base_q[i] = diff_q[i + 1] - diff_q[i]
+        base_q[i] = diff_q[i] - start
+        start = diff_q[i]
 
     return base_q
 

@@ -209,10 +209,4 @@ def plotting(booms):
 
     plt.show()
 
-
-print(b)
-print(z_pos)
-print(i_yy)
-print(i_zz)
-
-plotting(b, areas)
+plotting(b)
