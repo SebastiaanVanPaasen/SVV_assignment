@@ -212,3 +212,4 @@ for i in range(total_n):
     m_z[i] = slice_list[i].mz
 
 plt.plot(x_slice,v_z)
+plt.show()
