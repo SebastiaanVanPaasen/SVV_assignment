@@ -2,13 +2,10 @@ import numpy as np
 from SVV_assignment.SVV_assignment.geometric_properties import main
 
 Izz, B, z, y, s = main()
-
+print(y*1000)
 h_a = 0.173
 c_a = 0.484
 z = -1 * (z + h_a / 4)
-
-print(y)
-print(B)
 
 n_I = 149
 n_spar = 75
@@ -33,7 +30,6 @@ def q_b(booms, y_coordinates, moi):
     diff_q = np.zeros(len(booms))
 
     alpha = -1 / moi
-    print(alpha)
     value = 0
     for i in range(len(booms)):
         delta_q = alpha * booms[i] * y_coordinates[i]
@@ -98,10 +94,20 @@ total_area = np.pi * (h_a / 2) ** 2 / 2 + h_a * (c_a - h_a / 2)
 q_finalI = qdiffI + values[0][0]
 q_finalII = qdiffII + values[1][0]
 
-print(q_finalI)
-print(q_finalII)
-print(values)
+yI = np.append(y[len(y) - n_spar + 1:], y[:n_spar])
 
-# def sum_moments():
+# print(y)
+# print(values)
+# print(len(yI))
+# print(len(qdiffII))
+
+def sum_moments_I(y, z, shear_flow, summation_point, s):
+
+    for i in range(len(y)):
+        area = area_circle(s[i])
+
+        moment = 2*area*shear_flow[i]
+
+
     
 
