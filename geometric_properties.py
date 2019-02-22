@@ -2,12 +2,9 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-# </editor-fold>
 
-# <editor-fold desc="SIMULATION DATA">
 
 # </editor-fold>
-
 
 class SimulationData:
     IdealizedStructure_n_discretize = 601  # only ODD integer, 13<n<600 [contour_length/w_stiffner]
@@ -19,7 +16,34 @@ class ProblemData:  # Storage for globally accessiblee data (input geometry,..),
     t_spar, h_spar = 0.0025, h_aileron
 
 
-class IdealizedStructure():  # does NOT create instances, methods are static and values are class values
+class IdealizedStructure:  # does NOT create instances, methods are static and values are class values
+
+    #DONT USE THIS, REQUIRES "INSTANCE VALUES" METHOD
+    # <editor-fold desc="CONSTRUCTOR VARIABLES">
+    # def __init__(self, n_discretize="NAN",aileron="NAN",stiffner="NAN",a_spar="NAN", iyy="NAN", izz="NAN" ):#requires the "instance values" method
+    #     self.n_discretize = n_discretize
+    #     self.aileron = aileron
+    #     self.stiffner = stiffner
+    #     self.a_spar = a_spar
+    #     self.iyy = iyy
+    #     self.izz = izz
+    # </editor-fold>
+
+    #USE THIS
+    # <editor-fold desc="CONSTRUCTOR VALUES">
+    def __init__(self, n_discretize="NAN", aileron="NAN", stiffner="NAN", a_spar="NAN", iyy="NAN", izz="NAN"):
+        self.n_discretize = SimulationData.IdealizedStructure_n_discretize
+        self.aileron = (ProblemData.t_skin, ProblemData.h_aileron, ProblemData.cord_aileron)
+        self.stiffner = (ProblemData.t_stiffner, ProblemData.h_stiffner, ProblemData.w_stiffner)
+        self.a_spar = ProblemData.t_spar * ProblemData.h_spar
+        self.boom_areas_y, self.y_pos_booms, self.z_pos_booms, self.boom_areas_z = self.boom_area(self.aileron,
+                                                                                                  self.stiffner,
+                                                                                                  self.a_spar,
+                                                                                                  self.n_discretize)
+        self.izz = self.moi(self.boom_areas_z, self.z_pos_booms)
+        self.iyy = self.moi(self.boom_areas_y, self.y_pos_booms)
+    # </editor-fold>
+
     # <editor-fold desc="CLASS METHODS">
     # the methods are all static class methods and should not be used on instances as none will be initialized by the class
     @staticmethod
@@ -61,78 +85,6 @@ class IdealizedStructure():  # does NOT create instances, methods are static and
         if spar:
             a = a + a_spar / 2
         return a
-
-    @staticmethod
-    def boom_area(aileron, stiffner, a_spar, n_discretize):  # pass aileron, stiffner as tupel, see below
-        t_skin, h_aileron, cord_aileron = aileron
-        t_stiffner, h_stiffner, w_stiffner = stiffner
-
-        pos_stiffner, pos_spar, contour_length = IdealizedStructure.wingbox_idealize(h_aileron, cord_aileron, 13)
-        distance_boom = contour_length / n_discretize
-
-        pos_boom = np.array([])
-        pos_boom = np.append(pos_boom, 0)
-        for i in range(1, n_discretize):
-            pos_boom = np.append(pos_boom, pos_boom[-1] + distance_boom)
-
-        stiffner = False
-        spar = False
-
-        a_stiffner = IdealizedStructure.stiffner_area(t_stiffner, h_stiffner, w_stiffner)
-
-        z_pos_booms = np.array([])
-        y_pos_booms = np.array([])
-        for i in range(n_discretize):
-            y, z = IdealizedStructure.map_s_to_yz(i * distance_boom, h_aileron, cord_aileron)
-            z_pos_booms = np.append(z_pos_booms, z)
-            y_pos_booms = np.append(y_pos_booms, y)
-
-        boom_areas_z = np.array([])
-        areas = np.array([])
-        for i in range(n_discretize):
-            areas = np.append(areas,
-                              IdealizedStructure.area_units(stiffner, spar, a_stiffner, a_spar, t_skin, distance_boom))
-            stiffner, spar = False, False
-            for j in pos_stiffner:
-                if pos_boom[i] - distance_boom / 2 < j < pos_boom[i] + distance_boom / 2:
-                    stiffner = True
-
-            for j in pos_spar:
-                if pos_boom[i] - distance_boom / 2 < j < pos_boom[i] + distance_boom / 2:
-                    spar = True
-
-            if i == n_discretize - 1:  # not sure if still necessary, for z=0 for elements on y axis would be nicer and functionally equivalent
-                z_pos_local_booms = np.array([z_pos_booms[i - 1], z_pos_booms[i], z_pos_booms[0]])
-            else:
-                z_pos_local_booms = np.array([z_pos_booms[i - 1], z_pos_booms[i], z_pos_booms[i + 1]])
-            boom_areas_z = np.append(boom_areas_z,
-                                     IdealizedStructure.single_boom_area(stiffner, spar, a_stiffner, a_spar, t_skin,
-                                                                         distance_boom,
-                                                                         z_pos_local_booms))
-
-        cg_y_coordinate = IdealizedStructure.cg(areas, y_pos_booms)  # gives cg distance from LE
-        boom_areas_y = np.array([])
-        for i in range(n_discretize):
-            stiffner, spar = False, False
-            for j in pos_stiffner:
-                if pos_boom[i] - distance_boom / 2 < j < pos_boom[i] + distance_boom / 2:
-                    stiffner = True
-
-            for j in pos_spar:
-                if pos_boom[i] - distance_boom / 2 < j < pos_boom[i] + distance_boom / 2:
-                    spar = True
-            if i == n_discretize - 1:  # not sure if still necessary, for z=0 for elements on y axis would be nicer and functionally equivalent
-                y_pos_local_booms = np.array([y_pos_booms[i - 1] - cg_y_coordinate, y_pos_booms[i] - cg_y_coordinate,
-                                              y_pos_booms[0] - cg_y_coordinate])
-            else:
-                y_pos_local_booms = np.array([y_pos_booms[i - 1] - cg_y_coordinate, y_pos_booms[i] - cg_y_coordinate,
-                                              y_pos_booms[i + 1] - cg_y_coordinate])
-            boom_areas_y = np.append(boom_areas_y,
-                                     IdealizedStructure.single_boom_area(stiffner, spar, a_stiffner, a_spar, t_skin,
-                                                                         distance_boom,
-                                                                         y_pos_local_booms))
-
-        return boom_areas_y, y_pos_booms, z_pos_booms, boom_areas_z
 
     @staticmethod
     def moi(B, pos_booms):
@@ -179,21 +131,95 @@ class IdealizedStructure():  # does NOT create instances, methods are static and
                 z = -z
         return y, z
 
+    @classmethod
+    def boom_area(cls, aileron, stiffner, a_spar, n_discretize):  # pass aileron, stiffner as tupel, see below
+        t_skin, h_aileron, cord_aileron = aileron
+        t_stiffner, h_stiffner, w_stiffner = stiffner
+
+        pos_stiffner, pos_spar, contour_length = cls.wingbox_idealize(h_aileron, cord_aileron, 13)
+        distance_boom = contour_length / n_discretize
+
+        pos_boom = np.array([])
+        pos_boom = np.append(pos_boom, 0)
+        for i in range(1, n_discretize):
+            pos_boom = np.append(pos_boom, pos_boom[-1] + distance_boom)
+
+        stiffner = False
+        spar = False
+
+        a_stiffner = cls.stiffner_area(t_stiffner, h_stiffner, w_stiffner)
+
+        z_pos_booms = np.array([])
+        y_pos_booms = np.array([])
+        for i in range(n_discretize):
+            y, z = cls.map_s_to_yz(i * distance_boom, h_aileron, cord_aileron)
+            z_pos_booms = np.append(z_pos_booms, z)
+            y_pos_booms = np.append(y_pos_booms, y)
+
+        boom_areas_z = np.array([])
+        areas = np.array([])
+        for i in range(n_discretize):
+            areas = np.append(areas,
+                              cls.area_units(stiffner, spar, a_stiffner, a_spar, t_skin, distance_boom))
+            stiffner, spar = False, False
+            for j in pos_stiffner:
+                if pos_boom[i] - distance_boom / 2 < j < pos_boom[i] + distance_boom / 2:
+                    stiffner = True
+
+            for j in pos_spar:
+                if pos_boom[i] - distance_boom / 2 < j < pos_boom[i] + distance_boom / 2:
+                    spar = True
+
+            if i == n_discretize - 1:  # apparently still necessary (dont know why though), for z=0 for elements on y axis would be nicer and functionally equivalent
+                z_pos_local_booms = np.array([z_pos_booms[i - 1], z_pos_booms[i], z_pos_booms[0]])
+            else:
+                z_pos_local_booms = np.array([z_pos_booms[i - 1], z_pos_booms[i], z_pos_booms[i + 1]])
+            boom_areas_z = np.append(boom_areas_z,
+                                     cls.single_boom_area(stiffner, spar, a_stiffner, a_spar, t_skin,
+                                                          distance_boom,
+                                                          z_pos_local_booms))
+
+        cg_y_coordinate = cls.cg(areas, y_pos_booms)  # gives cg distance from LE
+        boom_areas_y = np.array([])
+        for i in range(n_discretize):
+            stiffner, spar = False, False
+            for j in pos_stiffner:
+                if pos_boom[i] - distance_boom / 2 < j < pos_boom[i] + distance_boom / 2:
+                    stiffner = True
+
+            for j in pos_spar:
+                if pos_boom[i] - distance_boom / 2 < j < pos_boom[i] + distance_boom / 2:
+                    spar = True
+            if i == n_discretize - 1:  # not sure if still necessary, for z=0 for elements on y axis would be nicer and functionally equivalent
+                y_pos_local_booms = np.array([y_pos_booms[i - 1] - cg_y_coordinate, y_pos_booms[i] - cg_y_coordinate,
+                                              y_pos_booms[0] - cg_y_coordinate])
+            else:
+                y_pos_local_booms = np.array([y_pos_booms[i - 1] - cg_y_coordinate, y_pos_booms[i] - cg_y_coordinate,
+                                              y_pos_booms[i + 1] - cg_y_coordinate])
+            boom_areas_y = np.append(boom_areas_y,
+                                     cls.single_boom_area(stiffner, spar, a_stiffner, a_spar, t_skin, distance_boom,
+                                                          y_pos_local_booms))
+
+        return boom_areas_y, y_pos_booms, z_pos_booms, boom_areas_z
+
     # </editor-fold>
 
-    # <editor-fold desc="CLASS VARIABLES">
-    n_discretize = SimulationData.IdealizedStructure_n_discretize
-    aileron = (ProblemData.t_skin, ProblemData.h_aileron, ProblemData.cord_aileron)
-    stiffner = (ProblemData.t_stiffner, ProblemData.h_stiffner, ProblemData.w_stiffner)
-    a_spar = ProblemData.t_spar * ProblemData.h_spar
-    boom_areas_y, y_pos_booms, z_pos_booms, boom_areas_z = boom_area(aileron, stiffner, a_spar,
-                                                                     n_discretize)
-    izz = moi(boom_areas_z, z_pos_booms)
-    iyy = moi(boom_areas_y, y_pos_booms)
-
+    # <editor-fold desc="INSTANCE VALUES">
+    # def set_intance_values(self,cls):
+    #     self.n_discretize = SimulationData.IdealizedStructure_n_discretize
+    #     self.aileron = (ProblemData.t_skin, ProblemData.h_aileron, ProblemData.cord_aileron)
+    #     self.stiffner = (ProblemData.t_stiffner, ProblemData.h_stiffner, ProblemData.w_stiffner)
+    #     self.a_spar = ProblemData.t_spar * ProblemData.h_spar
+    #     self.boom_areas_y, self.y_pos_booms, self.z_pos_booms, self.boom_areas_z = self.boom_area(cls, self.aileron,
+    #                                                                                               self.stiffner,
+    #                                                                                               self.a_spar,
+    #                                                                                               self.n_discretize)
+    #     self.izz = self.moi(self.boom_areas_z, self.z_pos_booms)
+    #     self.iyy = self.moi(self.boom_areas_y, self.y_pos_booms)
     # </editor-fold>
     
-    def main():
+
+def main():
     aileron = (t_skin, h_aileron, cord_aileron) = (0.0011, 0.173, 0.484)
     stiffner = (t_stiffner, h_stiffner, w_stiffner) = (0.0012, 0.014, 0.018)
     a_spar = 0.0025 * 0.173
@@ -216,6 +242,4 @@ class IdealizedStructure():  # does NOT create instances, methods are static and
     plt.show()
     return
 
-
 main()
-
