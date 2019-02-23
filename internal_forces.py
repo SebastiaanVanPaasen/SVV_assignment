@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 from SVV_assignment.SVV_assignment.geometry import *
+#from geometry import *
 
 # aileron parameters
 l_a = 1.691
@@ -151,7 +152,7 @@ for i in range(len(system)):
 
 unk = np.linalg.solve(sys_mat, sys_vec)
 for i in range(len(forces) - 4):
-    forces[i].magnitude *= abs(unk[i])  # TODO: make magnitude positive and the direction according to the correct sign
+    forces[i].magnitude *= unk[i]  # TODO: make magnitude positive and the direction according to the correct sign
 
 
 # return forces  ENDS HERE
@@ -214,6 +215,7 @@ for i in range(total_n):
     v_y[i] = slice_list[i].vy
     v_z[i] = slice_list[i].vz
     m_z[i] = slice_list[i].mz
+
 
 plt.plot(x_slice, m_z)
 plt.show()
