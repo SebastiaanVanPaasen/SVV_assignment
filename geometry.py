@@ -91,7 +91,7 @@ class Idealization:
         for i in range(len(booms)):
             if booms[i][0] > self.h_a / 2:
                 n_top_spar = i
-                print("top spar at " + str(i + 1))
+                # print("top spar at " + str(i + 1))
                 break
 
         booms = booms[:n_top_spar] + [[self.h_a / 2, self.h_a / 2]] + booms[n_top_spar:]
@@ -119,7 +119,7 @@ class Idealization:
         for i in range(len(booms)):
             if booms[i][1] < 0 and booms[i][0] < self.h_a / 2:
                 n_bottom_spar = i
-                print("bottom spar at " + str(i + 1))
+                # print("bottom spar at " + str(i + 1))
                 break
 
         booms = booms[:n_bottom_spar] + [[self.h_a / 2, -self.h_a / 2]] + booms[n_bottom_spar:]
@@ -193,17 +193,38 @@ class Idealization:
         return izz, iyy
 
 
-ideal = Idealization(20)
+def get_booms(n_booms):
+    ideal = Idealization(n_booms)
+    b, d = ideal.set_boom_locations()
+    areas = ideal.calculate_boom_area(b)
+    b, d, areas, top, bottom = ideal.add_spar_booms(b, d, areas)
 
-b, d = ideal.set_boom_locations()
+    return b, areas, ideal
 
-areas = ideal.calculate_boom_area(b)
 
-b, d, areas, top, bottom = ideal.add_spar_booms(b, d, areas)
+def get_cg(n_booms):
+    b, areas, ideal = get_booms(n_booms)
+    z_pos, b = ideal.calculate_cg(b, areas)
 
-z_pos, b = ideal.calculate_cg(b, areas)
+    return z_pos, b
 
-i_zz, i_yy = ideal.calculate_moi(b, areas)
+
+def get_moi(n_booms):
+    b, areas, ideal = get_booms(n_booms)
+    izz, iyy = ideal.calculate_moi(b, areas)
+
+    return izz, iyy
+
+
+def get_boom_information(n_booms):
+    ideal = Idealization(n_booms)
+    b, d = ideal.set_boom_locations()
+    areas = ideal.calculate_boom_area(b)
+    b, d, areas, top, bottom = ideal.add_spar_booms(b, d, areas)
+
+    return d, areas, top, bottom
+
+
 
 # def plotting(booms):
 #     for i in range(len(booms)):
@@ -213,5 +234,3 @@ i_zz, i_yy = ideal.calculate_moi(b, areas)
 #
 # plotting(b)
 
-print(top)
-print(bottom)

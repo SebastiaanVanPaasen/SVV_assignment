@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-#from SVV_assignment.SVV_assignment.geometric_properties import *
-import geometric_properties
 import copy
+from SVV_assignment.SVV_assignment.geometry import *
 
 # aileron parameters
 l_a = 1.691
@@ -16,7 +15,7 @@ x_3 = 1.541
 x_end = 1.691
 
 # actuator distances
-theta = 26  # degrees
+theta = np.radians(28)  # degrees
 x_a = 0.272
 x_a1 = x_2 - x_a / 2
 y_a1 = np.cos(np.radians(h_a / 2 - np.tan(np.radians(theta)) * h_a / 2))
@@ -28,9 +27,10 @@ q = 2710
 p = 37900
 E = 73.1 * 10 ** 9
 G = 28 * 10 ** 9
-I_zz, a, b, c, d = geometric_properties.main()
 delta_1 = 0.00681
 delta_3 = 0.0203
+
+izz, iyy = get_moi(20)
 
 
 class Force:
@@ -43,14 +43,10 @@ class Force:
         self.z = self.magnitude * self.direction[2]
 
     def determine_force(self, direction):
-        determinator = 0
         if direction == 'y':
-            determinator = 1
+            return self.magnitude * self.direction[1]
         elif direction == 'z':
-            determinator = 2
-
-        if self.direction[determinator] != 0:
-            return self.magnitude * self.direction[determinator]
+            return self.magnitude * self.direction[2]
         else:
             return 0
 
@@ -80,10 +76,10 @@ z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
 a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
 a_1z = Force(1, np.array([0, 0, 1]), np.array([x_a1, y_a1, z_a1]))
 # TODO: decompose the forces below into the corresponding tilted axis
-p_y = Force(p * np.sin(np.radians(theta)) , np.array([0, -1, 0]), np.array([x_a2, y_a1, z_a1]))
-p_z = Force(p * np.cos(np.radians(theta)) , np.array([0, 0, -1]), np.array([x_a2, y_a1, z_a1]))
-q_y = Force(q * np.cos(np.radians(theta)) * l_a, np.array([0, -1, 0]), np.array([l_a / 2, 0, 0]))
-q_z = Force(q * np.sin(np.radians(theta)) * l_a, np.array([0, 0, 1]), np.array([l_a / 2, 0, 0]))
+p_y = Force(p * np.sin(theta), np.array([0, -1, 0]), np.array([x_a2, y_a1, z_a1]))
+p_z = Force(p * np.cos(theta), np.array([0, 0, -1]), np.array([x_a2, y_a1, z_a1]))
+q_y = Force(q * np.cos(theta) * l_a, np.array([0, -1, 0]), np.array([l_a / 2, 0, 0]))
+q_z = Force(q * np.sin(theta) * l_a, np.array([0, 0, 1]), np.array([l_a / 2, 0, 0]))
 
 forces = [y_1, y_2, y_3, z_1, z_2, z_3, a_1y, a_1z, p_y, p_z, q_y, q_z]
 
@@ -104,17 +100,21 @@ for force in forces:
 # print(sum_forces_z)
 # print(sum_moments)
 
-ce_eq_z_1 = (1 / (E * I_zz)) * np.array([(l_a - x_1) ** 3 / 3,
-                      (l_a - x_2) ** 3 / 3 - (x_1 + x_2) * (l_a - x_2) ** 2 / 2 + x_1 * x_2 * (l_a - x_2),
-                      (l_a - x_3) ** 3 / 3 - (x_1 + x_3) * (l_a - x_3) ** 2 / 2 + x_1 * x_3 * (l_a - x_3),
-                      0., 0., 0.,
-                      (l_a - x_a1) ** 3 / 3 - (x_1 + x_a1) * (l_a - x_a1) ** 2 / 2 + x_1 * x_a1 * (l_a - x_a1),
-                      0.,
-                      (l_a - x_a2) ** 3 / 3 - (x_1 + x_a2) * (l_a - x_a2) ** 2 / 2 + x_1 * x_a2 * (l_a - x_a2),
-                      0.,
-                      -0.5 * (l_a ** 3 / 3 - x_1 * l_a * l_a / 2), delta_1])
+ce_eq_z_1 = (1 / (E * izz)) * np.array([(l_a - x_1) ** 3 / 3,
+                                        (l_a - x_2) ** 3 / 3 - (x_1 + x_2) * (l_a - x_2) ** 2 / 2 + x_1 * x_2 * (
+                                                l_a - x_2),
+                                        (l_a - x_3) ** 3 / 3 - (x_1 + x_3) * (l_a - x_3) ** 2 / 2 + x_1 * x_3 * (
+                                                l_a - x_3),
+                                        0., 0., 0.,
+                                        (l_a - x_a1) ** 3 / 3 - (x_1 + x_a1) * (l_a - x_a1) ** 2 / 2 + x_1 * x_a1 * (
+                                                l_a - x_a1),
+                                        0.,
+                                        (l_a - x_a2) ** 3 / 3 - (x_1 + x_a2) * (l_a - x_a2) ** 2 / 2 + x_1 * x_a2 * (
+                                                l_a - x_a2),
+                                        0.,
+                                        -0.5 * (l_a ** 3 / 3 - x_1 * l_a * l_a / 2), delta_1])
 
-ce_eq_z_3 = (1 / (E * I_zz)) * np.array(
+ce_eq_z_3 = (1 / (E * izz)) * np.array(
     [(l_a - x_1) ** 3 / 3 - (x_3 + x_1) * (l_a - x_1) ** 2 / 2 + x_3 * x_1 * (l_a - x_1),
      (l_a - x_2) ** 3 / 3 - (x_3 + x_2) * (l_a - x_2) ** 2 / 2 + x_3 * x_2 * (l_a - x_2),
      (l_a - x_3) ** 3 / 3,
@@ -125,19 +125,19 @@ ce_eq_z_3 = (1 / (E * I_zz)) * np.array(
      0.,
      -0.5 * (l_a ** 3 / 3 - x_3 * l_a * l_a / 2), delta_3])
 
-ce_eq_y = (1 / (E * I_zz)) * np.array([0., 0., 0., (l_a - x_1) ** 3 / 3,
-                                       (l_a - x_2) ** 3 / 3 - (x_1 + x_2) * (l_a - x_2) ** 2 / 2 + x_1 * x_2 * (
-                                               l_a - x_2),
-                                       (l_a - x_3) ** 3 / 3 - (x_1 + x_3) * (l_a - x_3) ** 2 / 2 + x_1 * x_3 * (
-                                               l_a - x_3),
-                                       0.,
-                                       (l_a - x_a1) ** 3 / 3 - (x_1 + x_a1) * (l_a - x_a1) ** 2 / 2 + x_1 * x_a1 * (
-                                               l_a - x_a1),
-                                       0.,
-                                       (l_a - x_a2) ** 3 / 3 - (x_1 + x_a2) * (l_a - x_a2) ** 2 / 2 + x_1 * x_a2 * (
-                                               l_a - x_a2),
-                                       0.,
-                                       -0.5 * (l_a ** 3 / 3 - x_1 * l_a * l_a / 2), 0.])
+ce_eq_y = (1 / (E * izz)) * np.array([0., 0., 0., (l_a - x_1) ** 3 / 3,
+                                      (l_a - x_2) ** 3 / 3 - (x_1 + x_2) * (l_a - x_2) ** 2 / 2 + x_1 * x_2 * (
+                                              l_a - x_2),
+                                      (l_a - x_3) ** 3 / 3 - (x_1 + x_3) * (l_a - x_3) ** 2 / 2 + x_1 * x_3 * (
+                                              l_a - x_3),
+                                      0.,
+                                      (l_a - x_a1) ** 3 / 3 - (x_1 + x_a1) * (l_a - x_a1) ** 2 / 2 + x_1 * x_a1 * (
+                                              l_a - x_a1),
+                                      0.,
+                                      (l_a - x_a2) ** 3 / 3 - (x_1 + x_a2) * (l_a - x_a2) ** 2 / 2 + x_1 * x_a2 * (
+                                              l_a - x_a2),
+                                      0.,
+                                      -0.5 * (l_a ** 3 / 3 - x_1 * l_a * l_a / 2), 0.])
 
 system = [sum_forces_y, sum_forces_z, sum_moments_x, sum_moments_y, sum_moments_z, ce_eq_y, ce_eq_z_1, ce_eq_z_3]
 
