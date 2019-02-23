@@ -18,7 +18,7 @@ class ProblemData:  # Storage for globally accessiblee data (input geometry,..),
 
 class IdealizedStructure:  # does NOT create instances, methods are static and values are class values
 
-    #DONT USE THIS, REQUIRES "INSTANCE VALUES" METHOD
+    # DONT USE THIS, REQUIRES "INSTANCE VALUES" METHOD
     # <editor-fold desc="CONSTRUCTOR VARIABLES">
     # def __init__(self, n_discretize="NAN",aileron="NAN",stiffner="NAN",a_spar="NAN", iyy="NAN", izz="NAN" ):#requires the "instance values" method
     #     self.n_discretize = n_discretize
@@ -29,7 +29,7 @@ class IdealizedStructure:  # does NOT create instances, methods are static and v
     #     self.izz = izz
     # </editor-fold>
 
-    #USE THIS
+    # USE THIS
     # <editor-fold desc="CONSTRUCTOR VALUES">
     def __init__(self, n_discretize="NAN", aileron="NAN", stiffner="NAN", a_spar="NAN", iyy="NAN", izz="NAN"):
         self.n_discretize = SimulationData.IdealizedStructure_n_discretize
@@ -42,6 +42,7 @@ class IdealizedStructure:  # does NOT create instances, methods are static and v
                                                                                                   self.n_discretize)
         self.izz = self.moi(self.boom_areas_z, self.z_pos_booms)
         self.iyy = self.moi(self.boom_areas_y, self.y_pos_booms)
+
     # </editor-fold>
 
     # <editor-fold desc="CLASS METHODS">
@@ -116,17 +117,17 @@ class IdealizedStructure:  # does NOT create instances, methods are static and v
             lower_side = True
 
         if 0. <= s <= math.pi * h_aileron / 4:
-            y = h_aileron / 2 * (1 - np.cos(s / (h_aileron / 2)))
-            z = h_aileron / 2 * np.sin(s / (h_aileron / 2))
+            y = h_aileron / 2 * (1 - np.cos(np.radians(s / (h_aileron / 2))))
+            z = h_aileron / 2 * np.sin(np.radians(s / (h_aileron / 2)))
             if lower_side:
                 z = -z
 
         elif math.pi * h_aileron / 4 < s <= math.pi * h_aileron / 4 + math.sqrt(
                 (cord_aileron - h_aileron / 2) ** 2 + (h_aileron / 2) ** 2):
-            y = h_aileron / 2 + (s - math.pi * h_aileron / 4) * np.cos(
-                np.arctan(h_aileron / 2 / (cord_aileron - h_aileron / 2)))
-            z = h_aileron / 2 - (s - math.pi * h_aileron / 4) * np.sin(
-                np.arctan(h_aileron / 2 / (cord_aileron - h_aileron / 2)))
+            y = h_aileron / 2 + (s - math.pi * h_aileron / 4) * np.cos(np.radians(
+                np.arctan(np.radians(h_aileron / 2 / (cord_aileron - h_aileron / 2)))))
+            z = h_aileron / 2 - (s - math.pi * h_aileron / 4) * np.sin(np.radians(
+                np.arctan(np.radians(h_aileron / 2 / (cord_aileron - h_aileron / 2)))))
             if lower_side:
                 z = -z
         return y, z
@@ -200,7 +201,7 @@ class IdealizedStructure:  # does NOT create instances, methods are static and v
                                      cls.single_boom_area(stiffner, spar, a_stiffner, a_spar, t_skin, distance_boom,
                                                           y_pos_local_booms))
 
-        return boom_areas_y, y_pos_booms, z_pos_booms, boom_areas_z
+        return boom_areas_y, y_pos_booms, z_pos_booms, boom_areas_z, pos_boom
 
     # </editor-fold>
 
@@ -217,29 +218,30 @@ class IdealizedStructure:  # does NOT create instances, methods are static and v
     #     self.izz = self.moi(self.boom_areas_z, self.z_pos_booms)
     #     self.iyy = self.moi(self.boom_areas_y, self.y_pos_booms)
     # </editor-fold>
-    
+
 
 def main():
     aileron = (t_skin, h_aileron, cord_aileron) = (0.0011, 0.173, 0.484)
     stiffner = (t_stiffner, h_stiffner, w_stiffner) = (0.0012, 0.014, 0.018)
     a_spar = 0.0025 * 0.173
     n_discretize = 601  # only ODD integer, 13<n<600 [contour_length/w_stiffner]
-    boom_areas_y, y_pos_booms, z_pos_booms, boom_areas_z = IdealizedStructure.boom_area(aileron, stiffner, a_spar,
+    boom_areas_y, y_pos_booms, z_pos_booms, boom_areas_z, s = IdealizedStructure.boom_area(aileron, stiffner, a_spar,
                                                                                         n_discretize)
-    for i in range(len(boom_areas_z)):
-        plt.scatter(y_pos_booms[i], z_pos_booms[i], s=60 * boom_areas_z[i] / max(boom_areas_z), color="blue",
-                    label="around y axis")
+    # for i in range(len(boom_areas_z)):
+    #     plt.scatter(y_pos_booms[i], z_pos_booms[i], s=60 * boom_areas_z[i] / max(boom_areas_z), color="blue",
+    #                 label="around y axis")
     for i in range(len(z_pos_booms)):
         z_pos_booms[i] = z_pos_booms[i] + h_aileron * 1.2
-    for i in range(len(boom_areas_y)):
-        plt.scatter(y_pos_booms[i], z_pos_booms[i], s=60 * boom_areas_y[i] / max(boom_areas_y), color="red",
-                    label="around z' axis")
-    plt.axis('equal')
+    # for i in range(len(boom_areas_y)):
+    #     plt.scatter(y_pos_booms[i], z_pos_booms[i], s=60 * boom_areas_y[i] / max(boom_areas_y), color="red",
+    #                 label="around z' axis")
+    # plt.axis('equal')
     izz = IdealizedStructure.moi(boom_areas_z, z_pos_booms)
     iyy = IdealizedStructure.moi(boom_areas_y, y_pos_booms)
     print("Izz: " + str(izz))
     print("Iyy: " + str(iyy))
-    plt.show()
-    return
+    # plt.show()
+    return iyy, boom_areas_y, y_pos_booms, z_pos_booms, s
+
 
 main()
