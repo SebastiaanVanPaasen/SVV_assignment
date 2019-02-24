@@ -18,7 +18,7 @@ class ProblemData:  # Storage for globally accessiblee data (input geometry,..),
 
 class IdealizedStructure:  # does NOT create instances, methods are static and values are class values
 
-    # DONT USE THIS, REQUIRES "INSTANCE VALUES" METHOD
+    #DONT USE THIS, REQUIRES "INSTANCE VALUES" METHOD
     # <editor-fold desc="CONSTRUCTOR VARIABLES">
     # def __init__(self, n_discretize="NAN",aileron="NAN",stiffner="NAN",a_spar="NAN", iyy="NAN", izz="NAN" ):#requires the "instance values" method
     #     self.n_discretize = n_discretize
@@ -29,7 +29,7 @@ class IdealizedStructure:  # does NOT create instances, methods are static and v
     #     self.izz = izz
     # </editor-fold>
 
-    # USE THIS
+    #USE THIS
     # <editor-fold desc="CONSTRUCTOR VALUES">
     def __init__(self, n_discretize="NAN", aileron="NAN", stiffner="NAN", a_spar="NAN", iyy="NAN", izz="NAN"):
         self.n_discretize = SimulationData.IdealizedStructure_n_discretize
@@ -42,7 +42,6 @@ class IdealizedStructure:  # does NOT create instances, methods are static and v
                                                                                                   self.n_discretize)
         self.izz = self.moi(self.boom_areas_z, self.z_pos_booms)
         self.iyy = self.moi(self.boom_areas_y, self.y_pos_booms)
-
     # </editor-fold>
 
     # <editor-fold desc="CLASS METHODS">
@@ -220,6 +219,20 @@ class IdealizedStructure:  # does NOT create instances, methods are static and v
     # </editor-fold>
 
 
+def read_table(filename):  # tables must be in form: 1 row header (description), separation by tabulators
+    file = open(filename, "r+")
+    file = file.readlines()
+    n_colums = len(file[0].split('\t'))
+    del file[0]
+    n_rows = len(file)
+    data = np.zeros(shape=(n_colums, n_rows))
+    for i in range(n_rows):
+        l = file[i].split('\t')
+        for j in range(n_colums):
+            data[j, i] = l[j]
+    return data
+
+
 def main():
     aileron = (t_skin, h_aileron, cord_aileron) = (0.0011, 0.173, 0.484)
     stiffner = (t_stiffner, h_stiffner, w_stiffner) = (0.0012, 0.014, 0.018)
@@ -242,6 +255,5 @@ def main():
     print("Iyy: " + str(iyy))
     plt.show()
     return
-
 
 main()
