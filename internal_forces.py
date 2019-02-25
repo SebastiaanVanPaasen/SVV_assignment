@@ -19,18 +19,17 @@ x_end = 1.691
 theta = 28  # degrees
 x_a = 0.272
 x_a1 = x_2 - x_a / 2
-y_a1 = np.cos(np.radians(h_a / 2 - np.tan(np.radians(theta)) * h_a / 2))
-z_a1 = np.cos(np.radians(theta)) * h_a / 2 + np.sin(np.radians(theta)) * h_a / 2
+y_a1 = np.cos(np.radians(h_a / 2 - np.tan(theta) * h_a / 2))
+z_a1 = np.cos(theta) * h_a / 2 + np.sin(theta) * h_a / 2
 x_a2 = x_2 + x_a / 2
 
 # load parameters
 q = 2710
 p = 37900
-E = 73.1 * 10 ** 9
-G = 28 * 10 ** 9
+E = 73.1 * (10 ** 9)
+G = 28 * (10 ** 9)
 delta_1 = 0.00681
 delta_3 = 0.0203
-
 izz, iyy = get_moi(20)
 
 
