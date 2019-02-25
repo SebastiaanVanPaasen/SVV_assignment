@@ -1,12 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
-#from SVV_assignment.SVV_assignment.geometry import *
-from geometry import *
+from SVV_assignment.SVV_assignment.geometry import *
+
+# from geometry import *
 
 # aileron parameters
 l_a = 1.691
 h_a = 0.173
+c_a = 0.484
 
 # force locations along the beam
 x_begin = 0
@@ -19,8 +21,8 @@ x_end = 1.691
 theta = 28  # degrees
 x_a = 0.272
 x_a1 = x_2 - x_a / 2
-y_a1 = np.cos(np.radians(h_a / 2 - np.tan(np.radians(theta)) * h_a / 2))
-z_a1 = np.cos(np.radians(theta)) * h_a / 2 + np.sin(np.radians(theta)) * h_a / 2
+y_a1 = h_a / 2  # np.cos(np.radians(h_a / 2 - np.tan(np.radians(theta)) * h_a / 2))
+z_a1 = h_a / 2  # np.cos(np.radians(theta)) * h_a / 2 + np.sin(np.radians(theta)) * h_a / 2
 x_a2 = x_2 + x_a / 2
 
 # load parameters
@@ -35,36 +37,36 @@ izz, iyy = get_moi(20)
 
 
 class Force:
-        
+
     def __init__(self, magnitude, direction, position):
         self.position = position
         self.direction = direction
         self.magnitude = magnitude
         self.d = np.linalg.norm(self.direction)
-        self.x = self.magnitude * self.direction[0]/self.d
-        self.y = self.magnitude * self.direction[1]/self.d
-        self.z = self.magnitude * self.direction[2]/self.d
-        
-    def modify(self, magnitude, direction = 1):
+        self.x = self.magnitude * self.direction[0] / self.d
+        self.y = self.magnitude * self.direction[1] / self.d
+        self.z = self.magnitude * self.direction[2] / self.d
+
+    def modify(self, magnitude, direction=1):
         self.magnitude = magnitude
         self.direction *= direction
-        self.x = self.magnitude * self.direction[0]/self.d
-        self.y = self.magnitude * self.direction[1]/self.d
-        self.z = self.magnitude * self.direction[2]/self.d
-        
+        self.x = self.magnitude * self.direction[0] / self.d
+        self.y = self.magnitude * self.direction[1] / self.d
+        self.z = self.magnitude * self.direction[2] / self.d
+
     def resultant(self, force_2):
         position = self.position
-        direction= np.zeros(3)
-        x = self.x + force_2.x 
+        direction = np.zeros(3)
+        x = self.x + force_2.x
         y = self.y + force_2.y
         z = self.z + force_2.z
-        vector = [x,y,z]
+        vector = [x, y, z]
         magnitude = np.linalg.norm(vector)
         for i in range(3):
-            direction[i] = vector[i]/magnitude
+            direction[i] = vector[i] / magnitude
         res_force = Force(magnitude, direction, position)
         return res_force
-        
+
     def determine_force(self, direction):
         if direction == 'y':
             return self.y
@@ -74,14 +76,15 @@ class Force:
             return self.x
         else:
             return 0
-    
+
     def determine_moment(self, position):
         distance = self.position - position
-        #        moments = np.zeros(3)
-        #        moments[0] = (self.y * distance[2] - self.z * distance[1])
-        #        moments[1] = (self.x * distance[2] - self.z * distance[0])
-        #        moments[2] = (-self.x * distance[1] + self.y * distance[0])
-        moments = np.cross(distance, [self.x, self.y, self.z])
+
+        moments = np.zeros(3)
+        moments[0] = (self.y * distance[2] - self.z * distance[1])
+        moments[1] = (self.x * distance[2] - self.z * distance[0])
+        moments[2] = (-self.x * distance[1] + self.y * distance[0])
+        # moments = np.cross(distance, [self.x, self.y, self.z])
 
         return moments
 
@@ -100,19 +103,20 @@ class Force:
 # def calc_reaction_forces():  THIS ONE
 y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1, 0]))
 y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
-y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
+y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3, 0]))
 
-z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
+z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1, 0]))
 z_2 = Force(1, np.array([0, 0, 1]), np.array([x_2, 0, 0]))
-z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
+z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3, 0]))
 
 a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
 a_1z = Force(1, np.array([0, 0, 1]), np.array([x_a1, y_a1, z_a1]))
 
 p_y = Force(abs(p * np.sin(np.radians(theta))), np.array([0, -1, 0]), np.array([x_a2, y_a1, z_a1]))
 p_z = Force(abs(p * np.cos(np.radians(theta))), np.array([0, 0, -1]), np.array([x_a2, y_a1, z_a1]))
-q_y = Force(abs(q * np.cos(np.radians(theta)) * l_a), np.array([0, -1, 0]), np.array([l_a / 2, 0, 0]))
-q_z = Force(abs(q * np.sin(np.radians(theta)) * l_a), np.array([0, 0, 1]), np.array([l_a / 2, 0, 0]))
+q_y = Force(abs(q * np.cos(np.radians(theta)) * l_a), np.array([0, -1, 0]),
+            np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
+q_z = Force(abs(q * np.sin(np.radians(theta)) * l_a), np.array([0, 0, 1]), np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
 
 forces = [y_1, y_2, y_3, z_1, z_2, z_3, a_1y, a_1z, p_y, p_z, q_y, q_z]
 
@@ -123,7 +127,7 @@ forces = [y_1, y_2, y_3, z_1, z_2, z_3, a_1y, a_1z, p_y, p_z, q_y, q_z]
 # P = Force(p, np.array([0,-1*np.sin(theta),-1*np.cos(theta)]), np.array([x_a2,y_a1,z_a1]))
 # Q = Force(q, np.array([0,-1*np.cos(theta),1*np.sin(theta)]), np.array([l_a/2, 0, 0]))
 
-#forces = [R1, R2, R3, A1, P, Q]
+# forces = [R1, R2, R3, A1, P, Q]
 
 sum_forces_y = []
 sum_forces_z = []
@@ -284,6 +288,7 @@ f2 = plt.figure()
 plt.plot(x_slice, m_y)
 plt.show()
 
+
 # f1 = plt.figure()
 # plt.plot(x_slice, m_z)
 # f2 = plt.figure()
@@ -314,7 +319,6 @@ def deflection_y(x, constant):
     return eq_def_y(x) + constant[0] * x + constant[1]
 
 
-int_constants = compute_constant(x_1,x_3,delta_1,delta_3)
+int_constants = compute_constant(x_1, x_3, delta_1, delta_3)
 d_y = deflection_y(x_slice, int_constants)
-plt.plot(x_slice,d_y)
-
+plt.plot(x_slice, d_y)
