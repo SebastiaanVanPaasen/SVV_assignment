@@ -142,19 +142,19 @@ for force in forces:
     sum_moments_y.append(force.determine_moment([0, 0, 0])[1])
     sum_moments_z.append(force.determine_moment([0, 0, 0])[2])
 
-ce_eq_z_1 = (1 / (E * izz)) * np.array([(l_a - x_1) ** 3 / 3,
-                                        (l_a - x_2) ** 3 / 3 - (x_1 + x_2) * (l_a - x_2) ** 2 / 2 + x_1 * x_2 * (
-                                                l_a - x_2),
-                                        (l_a - x_3) ** 3 / 3 - (x_1 + x_3) * (l_a - x_3) ** 2 / 2 + x_1 * x_3 * (
-                                                l_a - x_3),
-                                        0., 0., 0.,
-                                        (l_a - x_a1) ** 3 / 3 - (x_1 + x_a1) * (l_a - x_a1) ** 2 / 2 + x_1 * x_a1 * (
-                                                l_a - x_a1),
-                                        0.,
-                                        (l_a - x_a2) ** 3 / 3 - (x_1 + x_a2) * (l_a - x_a2) ** 2 / 2 + x_1 * x_a2 * (
-                                                l_a - x_a2),
-                                        0.,
-                                        -0.5 * (l_a ** 3 / 3 - x_1 * l_a * l_a / 2), delta_1])
+ce_eq_z_1 = (1 / (E * izz)) * np.array([((l_a - x_1) ** 3) / 3,
+                                        (x_end ** 3 - x_2 ** 3) / 3 + (x_2 ** 2 - x_end ** 2) * x_2 / 2 + (
+                                                x_2 ** 2 - x_end ** 2) * x_1 / 2 + x_2 * x_1 * (x_end - x_2),
+                                        (x_end ** 3 - x_3 ** 3) / 3
+                                        + (x_3 ** 2 - x_end ** 2) * x_3 / 2 + (
+                                                x_3 ** 2 - x_end ** 2) * x_1 / 2 + x_1 * x_3 * (x_end - x_3), 0., 0.,
+                                        0., (x_end ** 3 - x_a1 ** 3) / 3 + (x_a1 ** 2 - x_end ** 2) * x_a1 / 2 + (
+                                                x_a1 ** 2 - x_end ** 2) * x_1 / 2 + x_a1 * x_1 * (x_end - x_a1), 0.,
+                                        forces[8].y * ((x_end ** 3 - x_a2 ** 3) / 3 + (
+                                                x_a2 ** 2 - x_end ** 2) * x_a2 / 2 + (
+                                                               x_a2 * 2 - x_end ** 2) * x_1 / 2 + x_a2 * x_1 * (
+                                                               x_end - x_a2)), 0.,
+                                        forces[9].y * (x_end ** 3 * x_1 / 6 - x_end ** 4 / 8), 0.])
 
 ce_eq_z_3 = (1 / (E * izz)) * np.array(
     [(l_a - x_1) ** 3 / 3 - (x_3 + x_1) * (l_a - x_1) ** 2 / 2 + x_3 * x_1 * (l_a - x_1),
@@ -189,15 +189,15 @@ sys_vec = np.zeros(8)
 for i in range(len(system)):
     for j in range(len(system[0]) - 4):
         sys_mat[i][j] = system[i][j]
-    sys_vec[i] = -1 * np.sum(system[i][len(system):])
+        sys_vec[i] = -1 * np.sum(system[i][len(system):])
 
 unk = np.linalg.solve(sys_mat, sys_vec)
 for i in range(len(forces) - 4):
     forces[i].modify(abs(unk[i]), int(
         np.sign(unk[i])))  # TODO: make magnitude positive and the direction according to the correct sign
 
+    # return forces  ENDS HERE
 
-# return forces  ENDS HERE
 
 class Slice:
 
