@@ -15,8 +15,7 @@ class Idealization:
         self.h_stiff = 1.4 / 1000
         self.t_stiff = 1.2 / 1000
         self.t_spar = 2.5 / 1000
-        self.stiff_area = self.n_stiff * (self.w_stiff * self.h_stiff - ((self.w_stiff - self.t_stiff) *
-                                                                         (self.h_stiff - self.t_stiff)))
+        self.stiff_area = self.n_stiff * (self.w_stiff + self.h_stiff) * self.t_stiff
 
     def _calculate_boom_distance(self):
         s = np.pi * self.h_a / 2 + 2 * np.sqrt((self.c_a - (self.h_a / 2)) ** 2 + (self.h_a / 2) ** 2)
@@ -99,19 +98,17 @@ class Idealization:
 
         area_before_top_spar = self.t_skin * distance / 6 * (2 + booms[n_top_spar - 2][1] / booms[n_top_spar - 1][1]) + \
                                self.t_skin * (distances[n_top_spar] - distances[n_top_spar - 1]) / 6 * \
-                               (2 + booms[n_top_spar][1] / booms[n_top_spar - 1][1]) + self.stiff_area / (
-                                       self.n_boom + 2)
+                               (2 + booms[n_top_spar][1] / booms[n_top_spar - 1][1])
 
         area_after_top_spar = self.t_skin * distance / 6 * (2 + booms[n_top_spar + 2][1] / booms[n_top_spar + 1][1]) + \
                               self.t_skin * (distances[n_top_spar + 1] - distances[n_top_spar]) / 6 * \
-                              (2 + booms[n_top_spar][1] / booms[n_top_spar + 1][1]) + self.stiff_area / (
-                                      self.n_boom + 2)
+                              (2 + booms[n_top_spar][1] / booms[n_top_spar + 1][1])
 
         area_top_spar = self.t_skin * (distances[n_top_spar + 1] - distances[n_top_spar]) / 6 * \
                         (2 + booms[n_top_spar + 1][1] / booms[n_top_spar][1]) + self.stiff_area / (self.n_boom + 2) + \
                         self.t_skin * (distances[n_top_spar] - distances[n_top_spar - 1]) / 6 * \
                         (2 + booms[n_top_spar - 1][1] / booms[n_top_spar][1]) + \
-                        self.t_spar * self.h_a / 6 + self.stiff_area / (self.n_boom + 2)
+                        self.t_spar * self.h_a / 6
 
         boom_areas = boom_areas[:n_top_spar - 1] + [area_before_top_spar] + [area_top_spar] + [
             area_after_top_spar] + boom_areas[n_top_spar + 1:]
@@ -119,7 +116,7 @@ class Idealization:
         for i in range(len(booms)):
             if booms[i][1] < 0 and booms[i][0] < self.h_a / 2:
                 n_bottom_spar = i
-                # print("bottom spar at " + str(i + 1))
+                # print("bottom spar at " + str(i + 1)
                 break
 
         booms = booms[:n_bottom_spar] + [[self.h_a / 2, -self.h_a / 2]] + booms[n_bottom_spar:]
@@ -130,21 +127,19 @@ class Idealization:
         area_before_top_spar = self.t_skin * distance / 6 * (
                 2 + booms[n_bottom_spar - 2][1] / booms[n_bottom_spar - 1][1]) + \
                                self.t_skin * (distances[n_bottom_spar] - distances[n_bottom_spar - 1]) / 6 * \
-                               (2 + booms[n_bottom_spar][1] / booms[n_bottom_spar - 1][1]) + self.stiff_area / (
-                                       self.n_boom + 2)
+                               (2 + booms[n_bottom_spar][1] / booms[n_bottom_spar - 1][1])
 
         area_after_top_spar = self.t_skin * distance / 6 * (
                 2 + booms[n_bottom_spar + 2][1] / booms[n_bottom_spar + 1][1]) + \
                               self.t_skin * (distances[n_bottom_spar + 1] - distances[n_bottom_spar]) / 6 * \
-                              (2 + booms[n_bottom_spar][1] / booms[n_bottom_spar + 1][1]) + self.stiff_area / (
-                                      self.n_boom + 2)
+                              (2 + booms[n_bottom_spar][1] / booms[n_bottom_spar + 1][1])
 
         area_top_spar = self.t_skin * (distances[n_bottom_spar + 1] - distances[n_bottom_spar]) / 6 * \
                         (2 + booms[n_bottom_spar + 1][1] / booms[n_bottom_spar][1]) + self.stiff_area / (
                                 self.n_boom + 2) + \
                         self.t_skin * (distances[n_bottom_spar] - distances[n_bottom_spar - 1]) / 6 * \
                         (2 + booms[n_bottom_spar - 1][1] / booms[n_bottom_spar][1]) + \
-                        self.t_spar * self.h_a / 6 + self.stiff_area / (self.n_boom + 2)
+                        self.t_spar * self.h_a / 6
 
         boom_areas = boom_areas[:n_bottom_spar - 1] + [area_before_top_spar] + [area_top_spar] + [
             area_after_top_spar] + boom_areas[n_bottom_spar + 1:]
@@ -161,7 +156,7 @@ class Idealization:
                 after = self.t_skin * distance / 6 * (2 + booms[0][1] / booms[i][1])
             else:
                 after = self.t_skin * distance / 6 * (2 + booms[i + 1][1] / booms[i][1])
-            boom_areas.append(before + after + self.stiff_area / (self.n_boom + 2))
+            boom_areas.append(before + after + self.stiff_area / self.n_boom)
 
         return boom_areas
 
@@ -177,7 +172,7 @@ class Idealization:
         z_pos = nom / denom
 
         for i in range(len(pos)):
-            pos[i][0] - z_pos
+            -1 * pos[i][0] + z_pos
 
         return z_pos, pos
 
@@ -187,8 +182,8 @@ class Idealization:
         iyy = 0
 
         for i in range(len(pos)):
-            izz += a[i] * pos[i][1] ** 2
-            iyy += a[i] * pos[i][0] ** 2
+            izz += a[i] * (pos[i][1] ** 2)
+            iyy += a[i] * (pos[i][0] ** 2)
 
         return izz, iyy
 
@@ -225,7 +220,6 @@ def get_boom_information(n_booms):
     return d, areas, top, bottom
 
 
-
 # def plotting(booms):
 #     for i in range(len(booms)):
 #         plt.scatter(booms[i][0], booms[i][1], color= 'blue', label="Cross-section")
@@ -234,3 +228,9 @@ def get_boom_information(n_booms):
 #
 # plotting(b)
 
+
+izz, iyy = get_moi(14)
+z_pos, pos = get_cg(14)
+print(izz)
+print(iyy)
+print(z_pos)
