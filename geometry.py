@@ -172,7 +172,7 @@ class Idealization:
         z_pos = nom / denom
 
         for i in range(len(pos)):
-            pos[i][0] - z_pos
+            -1 * pos[i][0] + z_pos
 
         return z_pos, pos
 
@@ -182,8 +182,8 @@ class Idealization:
         iyy = 0
 
         for i in range(len(pos)):
-            izz += a[i] * pos[i][1] ** 2
-            iyy += a[i] * pos[i][0] ** 2
+            izz += a[i] * (pos[i][1] ** 2)
+            iyy += a[i] * (pos[i][0] ** 2)
 
         return izz, iyy
 

@@ -32,7 +32,7 @@ def q_s0(base_q, t, s):
     return x, y, num
 
 
-def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a):
+def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a, booms):
     base_q_celli = np.append(base_q[n_bottom:], base_q[:n_top])
     base_q_celli = np.append(base_q_celli, np.array([0]))
 
@@ -126,13 +126,13 @@ def sum_moments_ii(base_flow, constant_flow, cell_area, pos, summation_point, c_
 def get_shear_flows(b, areas, i_zz, t_skin, d, top, bottom, h_a, t_spar, c_a):
     q_diff = q_b(b, areas, i_zz)
     
-    celli, cellii = cell_separation(t_skin, q_diff, d, top, bottom, h_a, t_spar, b, h_a, c_a)
+    celli, cellii = cell_separation(t_skin, q_diff, d, top, bottom, h_a, t_spar, h_a, c_a, b)
     
     qsi = np.array([q_s0(celli[0], celli[2], celli[1])])
     qsii = np.array([q_s0(cellii[0], cellii[2], cellii[1])])
     
     sys = np.array([[qsi[0][0], qsi[0][1]], [qsii[0][0], qsii[0][1]]])
-    sys_vec = np.array([[qsi[0][2]], [qsii[0][2]]])
+    sys_vec = np.array([[-qsi[0][2]], [-qsii[0][2]]])
     
     values = np.linalg.solve(sys, sys_vec)
     
@@ -151,7 +151,7 @@ def summing_moments(constants, celli, cellii, z_pos):
 # pre shear-flow calculations
 n_booms = 20
 boom_distances, boom_areas, top_spar, bottom_spar = get_boom_information(n_booms)
-z_pos, booms = get_cg(n_booms)
+z_pos, booms_pos = get_cg(n_booms)
 izz, iyy = get_moi(n_booms)
 
 # required parameters
@@ -162,7 +162,7 @@ spar_t = 2.5 / 1000
 
 
 def get_shear_center():
-    constant, first_cell, second_cell = get_shear_flows(booms, boom_areas, izz, skin_t, boom_distances, top_spar,
+    constant, first_cell, second_cell = get_shear_flows(booms_pos, boom_areas, izz, skin_t, boom_distances, top_spar,
                                                         bottom_spar, height, spar_t, chord)
 
     shear_center = summing_moments(constant, first_cell, second_cell, z_pos)
