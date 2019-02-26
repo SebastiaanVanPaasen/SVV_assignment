@@ -1,8 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
-from SVV_assignment.SVV_assignment.geometry import *
-#from geometry import *
+
+#from SVV_assignment.SVV_assignment.geometry import *
+#from SVV_assignment.SVV_assignment.shear_flow_distribution import *
+#from SVV_assignment.SVV_assignment.shear_center import *
+
+from geometry import *
+from shear_flow_distribution import *
+from shear_center import *
 
 # aileron parameters
 l_a = 1.691
@@ -38,7 +44,7 @@ delta_3 = 0.0203
 delta_3y = delta_3 * np.cos(np.radians(theta))
 delta_3z = -delta_3 * np.sin(np.radians(theta))
 
-izz, iyy = get_moi(20)
+izz, iyy =  5.697e-6, 6.947e-5 #get_moi(20)
 
 
 class Force:
@@ -369,3 +375,10 @@ def eq_def_z(x, constant):
 d_y = eq_def_y(x_slice, int_constant_y)
 d_z = eq_def_z(x_slice, int_constant_z)
 plt.plot(x_slice, d_z)
+plt.plot(x_slice,d_y)
+
+
+
+#torque = Torque
+#shear = Shear
+

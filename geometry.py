@@ -183,7 +183,7 @@ class Idealization:
 
         return booms, distances, boom_areas, n_top_spar, n_bottom_spar
 
-    def calculate_boom_area_y(self, booms):
+    def calculate_boom_area(self, booms):
         """
         Calculates the area of all the booms.
 
@@ -208,33 +208,33 @@ class Idealization:
 
         return boom_areas
 
-    def calculate_boom_area_z(self, booms, n_top, n_bottom):
-        """
-        Calculates the area of all the booms.
-
-        :param booms: List, containing all the boom positinos in the y-z coordinate-frame.
-        :return: List, containing floats that represent the area of all the booms in the cross-section.
-        """
-        boom_areas = []
-        distance = self._calculate_boom_distance()
-
-        for i in range(len(booms)):
-            before = ((self.t_skin * distance) / 6) * (2 + (booms[-1 + i][0] / booms[i][0]))
-            # print("the ratio with the boom before: " + str(booms[-1 + i][1] / booms[i][1]))
-
-            if i == len(booms) - 1:
-                after = ((self.t_skin * distance) / 6) * (2 + (booms[0][0] / booms[i][0]))
-                # print("the final ratio equals: " + str(booms[0][1] / booms[i][1]))
-            else:
-                after = ((self.t_skin * distance) / 6) * (2 + (booms[i + 1][0] / booms[i][0]))
-
-            if i == n_top or i == n_bottom:
-                spar_addition = (self.t_spar * self.h_a) / 6
-                boom_areas.append(before + after + spar_addition)
-            else:
-                boom_areas.append(before + after + (self.stiff_area / self.n_boom))
-
-        return boom_areas
+    # def calculate_boom_area_z(self, booms, n_top, n_bottom):
+    #     """
+    #     Calculates the area of all the booms.
+    #
+    #     :param booms: List, containing all the boom positinos in the y-z coordinate-frame.
+    #     :return: List, containing floats that represent the area of all the booms in the cross-section.
+    #     """
+    #     boom_areas = []
+    #     distance = self._calculate_boom_distance()
+    #
+    #     for i in range(len(booms)):
+    #         before = ((self.t_skin * distance) / 6) * (2 + (booms[-1 + i][0] / booms[i][0]))
+    #         # print("the ratio with the boom before: " + str(booms[-1 + i][1] / booms[i][1]))
+    #
+    #         if i == len(booms) - 1:
+    #             after = ((self.t_skin * distance) / 6) * (2 + (booms[0][0] / booms[i][0]))
+    #             # print("the final ratio equals: " + str(booms[0][1] / booms[i][1]))
+    #         else:
+    #             after = ((self.t_skin * distance) / 6) * (2 + (booms[i + 1][0] / booms[i][0]))
+    #
+    #         if i == n_top or i == n_bottom:
+    #             spar_addition = (self.t_spar * self.h_a) / 6
+    #             boom_areas.append(before + after + spar_addition)
+    #         else:
+    #             boom_areas.append(before + after + (self.stiff_area / self.n_boom))
+    #
+    #     return boom_areas
 
     @staticmethod
     def calculate_cg(pos, area):
@@ -264,7 +264,7 @@ class Idealization:
         return z_pos, pos
 
     @staticmethod
-    def calculate_moi(pos, area_y, area_z):
+    def calculate_moi(pos, area):
         """
         Calculates the moments of inertia arond both the z- and y-axis.
 
@@ -276,8 +276,8 @@ class Idealization:
         iyy = 0
 
         for i in range(len(pos)):
-            izz += area_y[i] * (pos[i][1] ** 2)
-            iyy += area_z[i] * (pos[i][0] ** 2)
+            izz += area[i] * (pos[i][1] ** 2)
+            iyy += area[i] * (pos[i][0] ** 2)
 
         return izz, iyy
 
@@ -286,23 +286,23 @@ class Idealization:
 def get_booms(n_booms):
     ideal = Idealization(n_booms)
     booms, distances = ideal.set_boom_locations()
-    areas_y = ideal.calculate_boom_area_y(booms)
-    booms, distances, areas_y, top, bottom = ideal.add_spar_booms(booms, distances, areas_y)
-    areas_z = ideal.calculate_boom_area_z(booms, top, bottom)
+    areas = ideal.calculate_boom_area(booms)
+    booms, distances, areas_y, top, bottom = ideal.add_spar_booms(booms, distances, areas)
+    # areas_z = ideal.calculate_boom_area_z(booms, top, bottom)
 
-    return booms, areas_y, areas_z, ideal
+    return booms, areas, ideal
 
 
 def get_cg(n_booms):
-    booms, areas_y, areas_z, ideal = get_booms(n_booms)
-    z_pos, booms = ideal.calculate_cg(booms, areas_y)
+    booms, areas, ideal = get_booms(n_booms)
+    z_pos, booms = ideal.calculate_cg(booms, areas)
 
-    return z_pos, booms, ideal, areas_y, areas_z
+    return z_pos, booms, ideal, areas
 
 
 def get_moi(n_booms):
-    z_pos, booms, ideal, areas_y, areas_z = get_cg(n_booms)
-    izz, iyy = ideal.calculate_moi(booms, areas_y, areas_z)
+    z_pos, booms, ideal, areas = get_cg(n_booms)
+    izz, iyy = ideal.calculate_moi(booms, areas)
 
     return izz, iyy
 
@@ -313,7 +313,7 @@ def get_boom_information(n_booms):
     areas = ideal.calculate_boom_area(booms)
     booms, distances, areas, top, bottom = ideal.add_spar_booms(booms, distances, areas)
 
-    return d, areas, top, bottom
+    return distances, areas, top, bottom
 
 
 # def plotting(booms):
@@ -324,9 +324,3 @@ def get_boom_information(n_booms):
 #
 # plotting(b)
 
-
-moi_zz, moi_yy = get_moi(200)
-cg_z, b, idea, a_y, a_z = get_cg(200)
-print(moi_zz * 1000000000000)
-print(moi_yy * 1000000000000)
-print(cg_z)
