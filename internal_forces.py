@@ -1,8 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
-#from SVV_assignment.SVV_assignment.geometry import *
-from geometry import *
+
+from SVV_assignment.SVV_assignment.geometry import *
+from SVV_assignment.SVV_assignment.shear_flow_distribution import *
+from SVV_assignment.SVV_assignment.shear_center import *
+
+# from geometry import *
+# from shear_flow_distribution import *
+# from shear_center import *
 
 # aileron parameters
 l_a = 1.691
@@ -30,13 +36,13 @@ p = 37900
 E = 73.1 * 10 ** 9
 G = 28 * 10 ** 9
 delta_1 = 0.00681
-delta_1y = delta_1*np.cos(np.radians(theta))
-delta_1z = delta_1*np.sin(np.radians(theta))
+delta_1y = delta_1 * np.cos(np.radians(theta))
+delta_1z = delta_1 * np.sin(np.radians(theta))
 delta_3 = 0.0203
-delta_3y = delta_3*np.cos(np.radians(theta))
-delta_3z = delta_3*np.sin(np.radians(theta))
+delta_3y = delta_3 * np.cos(np.radians(theta))
+delta_3z = delta_3 * np.sin(np.radians(theta))
 
-izz, iyy = 5.697e-6, 6.947e-5 #get_moi(20)
+izz, iyy = 5.697e-6, 6.947e-5  # get_moi(20)
 
 
 class Force:
@@ -82,10 +88,10 @@ class Force:
 
     def determine_moment(self, position):
         distance = self.position - position
-#        moments = np.zeros(3)
-#        moments[0] = (self.y * distance[2] - self.z * distance[1])
-#        moments[1] = (self.x * distance[2] - self.z * distance[0])
-#        moments[2] = (-self.x * distance[1] + self.y * distance[0])
+        #        moments = np.zeros(3)
+        #        moments[0] = (self.y * distance[2] - self.z * distance[1])
+        #        moments[1] = (self.x * distance[2] - self.z * distance[0])
+        #        moments[2] = (-self.x * distance[1] + self.y * distance[0])
         moments = np.cross(distance, [self.x, self.y, self.z])
 
         return moments
@@ -102,24 +108,25 @@ class Force:
         return rotated_force
 
     def macauley(self, deflection, direction, x):
-        term = 1/6*np.array([self.x,self.y,self.z])*direction*((x-self.position[0])**3)*np.heaviside(x-self.position[0],1)
+        term = 1 / 6 * np.array([self.x, self.y, self.z]) * direction * ((x - self.position[0]) ** 3) * np.heaviside(
+            x - self.position[0], 1)
         if direction[2] != 0:
-            term*=-1
+            term *= -1
         return term
 
 
 # def calc_reaction_forces():  THIS ONE
 y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
-#y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
+# y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
 y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
 y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
-#y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
+# y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
 
 z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
-#z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
+# z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
 z_2 = Force(1, np.array([0, 0, 1]), np.array([x_2, 0, 0]))
 z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
-#z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
+# z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
 
 a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
 a_1z = Force(1, np.array([0, 0, 1]), np.array([x_a1, y_a1, z_a1]))
@@ -146,12 +153,12 @@ sum_forces_z = []
 sum_moments_x = []
 sum_moments_y = []
 sum_moments_z = []
-#defl_y1 = []
-#defl_y2 = []
-#defl_y3 = []
-#defl_z1 = []
-#defl_z2 = []
-#defl_z3 = []
+# defl_y1 = []
+# defl_y2 = []
+# defl_y3 = []
+# defl_z1 = []
+# defl_z2 = []
+# defl_z3 = []
 
 for force in forces:
     sum_forces_y.append(force.determine_force('y'))
@@ -160,7 +167,7 @@ for force in forces:
     sum_moments_y.append(force.determine_moment([0, 0, 0])[1])
     sum_moments_z.append(force.determine_moment([0, 0, 0])[2])
 
-#for i in range(len(forces)):
+# for i in range(len(forces)):
 #    sum_forces_y.append(forces[i].determine_force('y'))
 #    sum_forces_z.append(forces[i].determine_force('z'))
 #    sum_moments_x.append(forces[i].determine_moment([0, 0, 0])[0])
@@ -175,94 +182,94 @@ for force in forces:
 #        defl_z3.append(forces[i].macauley(delta_3y, [0,0,1], x_3))     #wanted to do this but how do you insert elements from a list to another list
 
 
-defl_y1 = 1/6* np.array([(x_1 - x_1) ** 3 * np.heaviside(x_1 - x_1, 1),
-                         (x_1 - x_2) ** 3 * np.heaviside(x_1 - x_2, 1),
-                         (x_1 - x_3) ** 3 * np.heaviside(x_1 - x_3, 1),
-                         0., 0., 0.,
-                         (x_1 - x_a1) ** 3 * np.heaviside(x_1 - x_a1, 1),
-                         0.,
-                         6*x_1, 6*1., 0., 0.,
-                         forces[8].y*((x_1 - x_a2) ** 3) * np.heaviside(x_1 - x_a2, 1),
-                         0.,
-                         6*forces[10].y / 24 * (x_1 ** 4),
-                         0.,
-                         -E*izz*6*delta_1y])
+defl_y1 = 1 / 6 * np.array([(x_1 - x_1) ** 3 * np.heaviside(x_1 - x_1, 1),
+                            (x_1 - x_2) ** 3 * np.heaviside(x_1 - x_2, 1),
+                            (x_1 - x_3) ** 3 * np.heaviside(x_1 - x_3, 1),
+                            0., 0., 0.,
+                            (x_1 - x_a1) ** 3 * np.heaviside(x_1 - x_a1, 1),
+                            0.,
+                            6 * x_1, 6 * 1., 0., 0.,
+                            forces[8].y * ((x_1 - x_a2) ** 3) * np.heaviside(x_1 - x_a2, 1),
+                            0.,
+                            6 * forces[10].y / 24 * (x_1 ** 4),
+                            0.,
+                            -E * izz * 6 * delta_1y])
 
-defl_y2 = 1/6* np.array([(x_2 - x_1) ** 3 * np.heaviside(x_2 - x_1, 1),
-                         (x_2 - x_2) ** 3 * np.heaviside(x_2 - x_2, 1),
-                         (x_2 - x_3) ** 3 * np.heaviside(x_2 - x_3, 1),
-                         0., 0., 0.,
-                         (x_2 - x_a1) ** 3 * np.heaviside(x_2 - x_a1, 1),
-                         0.,
-                         6*x_2, 6*1., 0., 0.,
-                         forces[8].y*((x_2 - x_a2) ** 3) * np.heaviside(x_2 - x_a2, 1),
-                         0.,
-                         6*forces[10].y / 24 * (x_2 ** 4),
-                         0., 0.])
+defl_y2 = 1 / 6 * np.array([(x_2 - x_1) ** 3 * np.heaviside(x_2 - x_1, 1),
+                            (x_2 - x_2) ** 3 * np.heaviside(x_2 - x_2, 1),
+                            (x_2 - x_3) ** 3 * np.heaviside(x_2 - x_3, 1),
+                            0., 0., 0.,
+                            (x_2 - x_a1) ** 3 * np.heaviside(x_2 - x_a1, 1),
+                            0.,
+                            6 * x_2, 6 * 1., 0., 0.,
+                            forces[8].y * ((x_2 - x_a2) ** 3) * np.heaviside(x_2 - x_a2, 1),
+                            0.,
+                            6 * forces[10].y / 24 * (x_2 ** 4),
+                            0., 0.])
 
-defl_y3 = 1/6*np.array([(x_3 - x_1) ** 3 * np.heaviside(x_3 - x_1, 1),
-                        (x_3 - x_2) ** 3 * np.heaviside(x_3 - x_2, 1),
-                        (x_3 - x_3) ** 3 * np.heaviside(x_3 - x_3, 1),
-                        0., 0., 0.,
-                        (x_3 - x_a1) ** 3 * np.heaviside(x_3 - x_a1, 1),
-                        0.,
-                        6*x_3, 6*1., 0.,0.,
-                        forces[8].y*((x_3 - x_a2) ** 3) * np.heaviside(x_3 - x_a2, 1),
-                        0.,
-                        6*forces[10].y / 24 * (x_3 ** 4),
-                        0.,
-                        -E*izz*6*delta_3y])
+defl_y3 = 1 / 6 * np.array([(x_3 - x_1) ** 3 * np.heaviside(x_3 - x_1, 1),
+                            (x_3 - x_2) ** 3 * np.heaviside(x_3 - x_2, 1),
+                            (x_3 - x_3) ** 3 * np.heaviside(x_3 - x_3, 1),
+                            0., 0., 0.,
+                            (x_3 - x_a1) ** 3 * np.heaviside(x_3 - x_a1, 1),
+                            0.,
+                            6 * x_3, 6 * 1., 0., 0.,
+                            forces[8].y * ((x_3 - x_a2) ** 3) * np.heaviside(x_3 - x_a2, 1),
+                            0.,
+                            6 * forces[10].y / 24 * (x_3 ** 4),
+                            0.,
+                            -E * izz * 6 * delta_3y])
 
-defl_z1 = -1/6*np.array([0., 0., 0.,
-                          (x_1 - x_1) ** 3 * np.heaviside(x_1 - x_1, 1),
-                          (x_1 - x_2) ** 3 * np.heaviside(x_1 - x_2, 1),
-                          (x_1 - x_3) ** 3 * np.heaviside(x_1 - x_3, 1),
-                          0.,
-                          (x_1 - x_a1) ** 3 * np.heaviside(x_1 - x_a1, 1),
-                          0.,0., 6*x_1, 6*1.,
-                          0.,
-                          forces[9].z*((x_1 - x_a2) ** 3) * np.heaviside(x_1 - x_a2, 1),
-                          0.,
-                          6*forces[11].y / 24 * (x_1 ** 4),
-                          -E*iyy*6*delta_1z])
+defl_z1 = -1 / 6 * np.array([0., 0., 0.,
+                             (x_1 - x_1) ** 3 * np.heaviside(x_1 - x_1, 1),
+                             (x_1 - x_2) ** 3 * np.heaviside(x_1 - x_2, 1),
+                             (x_1 - x_3) ** 3 * np.heaviside(x_1 - x_3, 1),
+                             0.,
+                             (x_1 - x_a1) ** 3 * np.heaviside(x_1 - x_a1, 1),
+                             0., 0., 6 * x_1, 6 * 1.,
+                             0.,
+                             forces[9].z * ((x_1 - x_a2) ** 3) * np.heaviside(x_1 - x_a2, 1),
+                             0.,
+                             6 * forces[11].y / 24 * (x_1 ** 4),
+                             -E * iyy * 6 * delta_1z])
 
-defl_z2 = -1/6*np.array([0., 0., 0.,
-                        (x_2 - x_1) ** 3 * np.heaviside(x_2 - x_1, 1),
-                        (x_2 - x_2) ** 3 * np.heaviside(x_2 - x_2, 1),
-                        (x_2 - x_3) ** 3 * np.heaviside(x_2 - x_3, 1),
-                        0.,
-                        (x_2 - x_a1) ** 3 * np.heaviside(x_2 - x_a1, 1),
-                        0., 0., 6*x_2, 6*1.,
-                        0.,
-                        forces[9].z*((x_2 - x_a2) ** 3) * np.heaviside(x_2 - x_a2, 1),
-                        0.,
-                        6*forces[11].y / 24 * (x_2 ** 4),
-                        0.])
+defl_z2 = -1 / 6 * np.array([0., 0., 0.,
+                             (x_2 - x_1) ** 3 * np.heaviside(x_2 - x_1, 1),
+                             (x_2 - x_2) ** 3 * np.heaviside(x_2 - x_2, 1),
+                             (x_2 - x_3) ** 3 * np.heaviside(x_2 - x_3, 1),
+                             0.,
+                             (x_2 - x_a1) ** 3 * np.heaviside(x_2 - x_a1, 1),
+                             0., 0., 6 * x_2, 6 * 1.,
+                             0.,
+                             forces[9].z * ((x_2 - x_a2) ** 3) * np.heaviside(x_2 - x_a2, 1),
+                             0.,
+                             6 * forces[11].y / 24 * (x_2 ** 4),
+                             0.])
 
-defl_z3 = -1/6*np.array([0., 0., 0.,
-                       (x_3 - x_1) ** 3 * np.heaviside(x_3 - x_1, 1),
-                       (x_3 - x_2) ** 3 * np.heaviside(x_3 - x_2, 1),
-                       (x_3 - x_3) ** 3 * np.heaviside(x_3 - x_3, 1),
-                       0.,
-                       (x_3 - x_a1) ** 3 * np.heaviside(x_3 - x_a1, 1),
-                       0.,0., 6*x_3, 6*1.,
-                       0.,
-                       forces[9].z*((x_3 - x_a2) ** 3) * np.heaviside(x_3 - x_a2, 1),
-                       0.,
-                       6*forces[11].y / 24 * (x_3 ** 4),
-                       -E*iyy*6*delta_3z])
+defl_z3 = -1 / 6 * np.array([0., 0., 0.,
+                             (x_3 - x_1) ** 3 * np.heaviside(x_3 - x_1, 1),
+                             (x_3 - x_2) ** 3 * np.heaviside(x_3 - x_2, 1),
+                             (x_3 - x_3) ** 3 * np.heaviside(x_3 - x_3, 1),
+                             0.,
+                             (x_3 - x_a1) ** 3 * np.heaviside(x_3 - x_a1, 1),
+                             0., 0., 6 * x_3, 6 * 1.,
+                             0.,
+                             forces[9].z * ((x_3 - x_a2) ** 3) * np.heaviside(x_3 - x_a2, 1),
+                             0.,
+                             6 * forces[11].y / 24 * (x_3 ** 4),
+                             -E * iyy * 6 * delta_3z])
 
 trig = np.zeros(16)
 trig[6] = np.cos(np.radians(theta))
 trig[7] = -np.sin(np.radians(theta))
 
-#system = [sum_forces_y, sum_forces_z, sum_moments_x, sum_moments_y, sum_moments_z, ce_eq_y, ce_eq_z_1, ce_eq_z_3]
+# system = [sum_forces_y, sum_forces_z, sum_moments_x, sum_moments_y, sum_moments_z, ce_eq_y, ce_eq_z_1, ce_eq_z_3]
 system = [sum_forces_y, sum_forces_z, sum_moments_x, sum_moments_y, sum_moments_z, defl_z1, defl_z2, defl_z3,
           defl_y1, defl_y2, defl_y3, trig]
 
 for i in range(5):
     for j in range(4):
-        system[i].insert((j+8),0)
+        system[i].insert((j + 8), 0)
 
 # solving reaction forces
 sys_mat = np.zeros((12, 12))
@@ -288,9 +295,8 @@ for i in range(len(forces)):
     forces_global.append(forces[i].rotate(28))
 for i in range(len(forces)):
     if i % 2 == 0:
-        forces_resultant.append(forces[i].resultant(forces[i+1]))
-        forces_resultant_global.append(forces_global[i].resultant(forces_global[i+1]))
-
+        forces_resultant.append(forces[i].resultant(forces[i + 1]))
+        forces_resultant_global.append(forces_global[i].resultant(forces_global[i + 1]))
 
 
 class Slice:
@@ -375,9 +381,10 @@ for i in range(total_n):
     m_y[i] = slice_list[i].my
     m_x[i] = slice_list[i].mx
 
-#slice_list_global = []
-#slice_app_force_global = []  # unnecessary
-#for i in range(total_n):
+
+# slice_list_global = []
+# slice_app_force_global = []  # unnecessary
+# for i in range(total_n):
 #    slice_list_global.append(Slice([x_slice[i], 0, 0], d_x))
 #    slice_app_force_global.append(slice_list_global[i].int_dist(forces_global, l_a))
 #    v_y[i] = slice_list_global[i].vy
@@ -387,11 +394,11 @@ for i in range(total_n):
 #    m_x[i] = slice_list_global[i].mx
 
 
-#f1 = plt.figure()
-#plt.plot(x_slice, v_z)
-#f2 = plt.figure()
-#plt.plot(x_slice, m_y)
-#plt.show()
+# f1 = plt.figure()
+# plt.plot(x_slice, v_z)
+# f2 = plt.figure()
+# plt.plot(x_slice, m_y)
+# plt.show()
 
 
 # f1 = plt.figure()
@@ -406,7 +413,8 @@ def eq_def_y(x):
     return 1 / (E * izz * 6) * (forces[0].y * (x - x_1) ** 3 * np.heaviside(x - x_1, 1) +
                                 forces[1].y * (x - x_2) ** 3 * np.heaviside(x - x_2, 1) +
                                 forces[2].y * (x - x_3) ** 3 * np.heaviside(x - x_3, 1) +
-                                forces[8].y * (x - x_a2) ** 3 * np.heaviside(x - x_a2, 1)) + 1/(E*izz)*forces[10].y / 24 * x ** 4
+                                forces[8].y * (x - x_a2) ** 3 * np.heaviside(x - x_a2, 1)) + 1 / (E * izz) * forces[
+               10].y / 24 * x ** 4
 
 
 def compute_constant(x1, x3, delta1, delta3):
@@ -421,13 +429,17 @@ def compute_constant(x1, x3, delta1, delta3):
 
 
 def deflection_y(x, constant, moi):
-    return eq_def_y(x) + 1/(E*moi)*constant[0] * x + 1/(E*moi)*constant[1]
+    return eq_def_y(x) + 1 / (E * moi) * constant[0] * x + 1 / (E * moi) * constant[1]
 
 
-#d_y = np.array(len(x_slice))
+# d_y = np.array(len(x_slice))
 ##int_constants = compute_constant(x_1,x_3,delta_1,delta_3)
-#for i in range(len(x_slice)):
+# for i in range(len(x_slice)):
 #    d_y[i] = deflection_y(x_slice[i], int_constant_y, izz)
 d_y = deflection_y(x_slice, int_constant_y, izz)
-plt.plot(x_slice,d_y)
+plt.plot(x_slice, d_y)
+
+
+torque = Torque
+shear = Shear
 
