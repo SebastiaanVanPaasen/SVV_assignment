@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
@@ -334,16 +333,53 @@ m_z = np.zeros(total_n)
 m_y = np.zeros(total_n)
 m_x = np.zeros(total_n)
 
+# ----------------------------------------------------------------------------------------------------------------------
+n_booms = 260
+torque = Torque()
+shear = Shear()
+
+cg_z, boom_locations = get_cg(n_booms)
+moi_zz, moi_yy = get_moi(n_booms)
+boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
+sc_z = get_shear_center()
+
+print("sc : " + str(sc_z))
+print("izz : " + str(moi_zz), "\n  iyy : " + str(moi_yy))
+print("boom locations : " + str(boom_locations))
+# ----------------------------------------------------------------------------------------------------------------------
+
 slice_list = []
 slice_app_force = []  # unnecessary
 for i in range(total_n):
-    slice_list.append(Slice([x_slice[i], 0, 0], d_x))
+    slice_list.append(Slice([x_slice[i], 0, sc_z], d_x))
     slice_app_force.append(slice_list[i].int_dist(forces, l_a))
     v_y[i] = slice_list[i].vy
     v_z[i] = slice_list[i].vz
     m_z[i] = slice_list[i].mz
     m_y[i] = slice_list[i].my
     m_x[i] = slice_list[i].mx
+
+    q_b = shear.q_b(boom_locations, boom_areas, moi_zz, moi_yy, v_y[i], v_z[i])
+    cell_i, cell_ii = shear.create_cell_properties(distances, boom_locations, top, bottom, q_b)
+
+    final_shear = shear.solve_system([x_slice[i], 0, sc_z])
+
+    torque.create_cell_properties(distances, top, bottom)
+    final_torque = torque.solve_system(m_x[i])
+    
+
+
+
+# slice_list_global = []
+# slice_app_force_global = []  # unnecessary
+# for i in range(total_n):
+#    slice_list_global.append(Slice([x_slice[i], 0, 0], d_x))
+#    slice_app_force_global.append(slice_list_global[i].int_dist(forces_global, l_a))
+#    v_y[i] = slice_list_global[i].vy
+#    v_z[i] = slice_list_global[i].vz
+#    m_z[i] = slice_list_global[i].mz
+#    m_y[i] = slice_list_global[i].my
+#    m_x[i] = slice_list_global[i].mx
 
 
 # f1 = plt.figure()
@@ -361,7 +397,19 @@ def eq_def_y(x, constant):
                                       forces[8].y * ((x - x_a2) ** 3) * np.heaviside(x - x_a2, 1)) + qy / 24 * (
                                          x ** 4) + constant[0] * x + constant[1])
 
+#def compute_constant(x1, x3, delta1, delta3):
+#    mat = np.ones((2,2))
+#    vec = np.ones(2)
+#    mat[0,0] = x1
+#    mat[1,0] = x3
+#    vec[0] = -delta1 - eq_def_y(x1)
+#    vec[1] = -delta3 - eq_def_y(x3)
+#    constants = np.linalg.solve(mat,vec)
+#    return constants
 
+
+#def deflection_y(x, constant, moi):
+#    return -(eq_def_y(x) + 1/(E*moi)*constant[0] * x + 1/(E*moi)*constant[1])
 # deflection in z
 def eq_def_z(x, constant):
     return -1 / (E * iyy) * (-1 / 6 * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
@@ -381,4 +429,6 @@ plt.plot(x_slice,d_y)
 
 #torque = Torque
 #shear = Shear
+
+
 

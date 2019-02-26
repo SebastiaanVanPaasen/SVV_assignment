@@ -1,23 +1,22 @@
-import numpy as np
 from SVV_assignment.SVV_assignment.geometry import *
 
 
-def q_b(booms, a, moi):
+def q_b(booms, area, moi):
     diff_q = np.zeros(len(booms))
 
     alpha = -1 / moi
-    value = 0
     for i in range(len(booms)):
-        delta_q = alpha * booms[i][1] * a[i]
-        value += delta_q
-        diff_q[i] = value
+        delta_q = alpha * booms[i][1] * area[i]
+        diff_q[i] = delta_q
 
     base_q = np.zeros(len(booms))
-    start = 0
+    previous = diff_q[0]
     for i in range(1, len(diff_q)):
-        base_q[i] = diff_q[i] - start
-        start = diff_q[i]
+        base_q[i] = previous + diff_q[i]
+        previous = diff_q[i]
 
+    # print(base_q)
+    # print(len(base_q))
     return base_q
 
 
@@ -33,43 +32,42 @@ def q_s0(base_q, t, s):
 
 
 def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a, booms):
-    base_q_celli = np.append(base_q[n_bottom:], base_q[:n_top])
-    base_q_celli = np.append(base_q_celli, np.array([0]))
+    base_q_cell_i = np.append(base_q[n_bottom + 1:], base_q[:n_top + 1])
+    base_q_cell_i = np.append(base_q_cell_i, np.array([0]))
+    base_q_cell_ii = np.append(base_q[n_top + 1:n_bottom + 1], np.array([0]))
 
     bottom_locations = s[n_bottom:]
     top_locations = s[:n_top + 1]
 
-    s_celli_bottom = np.zeros(len(bottom_locations) - 1)
+    s_cell_i_bottom = np.zeros(len(bottom_locations))
     for i in range(len(bottom_locations) - 1):
-        s_celli_bottom[i] = bottom_locations[i + 1] - bottom_locations[i]
-    s_celli_bottom[-1] += top_locations[0]
+        s_cell_i_bottom[i] = bottom_locations[i + 1] - bottom_locations[i]
+    s_cell_i_bottom[-1] += top_locations[0] * 2
 
-    s_celli_top = np.zeros(len(top_locations) - 1)
+    s_cell_i_top = np.zeros(len(top_locations) - 1)
     for i in range(len(top_locations) - 1):
-        s_celli_top[i] = top_locations[i + 1] - top_locations[i]
+        s_cell_i_top[i] = top_locations[i + 1] - top_locations[i]
 
-    s_celli = np.append(np.append(s_celli_bottom, s_celli_top), np.array([d_spar]))
-    t_celli = np.append(np.array((len(s_celli) - 1) * [skin]), np.array([spar]))
+    s_cell_i = np.append(np.append(s_cell_i_bottom, s_cell_i_top), np.array([d_spar]))
 
-    celli_coordinates = booms[n_bottom:] + booms[:n_top + 1]
+    s_cell_ii_locations = s[n_top:n_bottom + 1]
+    s_cell_ii = np.zeros(len(s_cell_ii_locations) - 1)
+    for i in range(len(s_cell_ii_locations) - 1):
+        s_cell_ii[i] = s_cell_ii_locations[i + 1] - s_cell_ii_locations[i]
 
-    base_q_cellii = np.append(base_q[n_top:n_bottom], np.array([0]))
+    s_cell_ii = np.append(s_cell_ii, np.array([d_spar]))
 
-    s_cellii_locations = s[n_top:n_bottom + 1]
-    s_cellii = np.zeros(len(s_cellii_locations) - 1)
-    for i in range(len(s_cellii_locations) - 1):
-        s_cellii[i] = s_cellii_locations[i + 1] - s_cellii_locations[i]
+    t_cell_i = np.append(np.array((len(s_cell_i) - 1) * [skin]), np.array([spar]))
+    t_cell_ii = np.append(np.array((len(s_cell_ii) - 1) * [skin]), np.array([spar]))
 
-    s_cellii = np.append(s_cellii, np.array([d_spar]))
-    t_cellii = np.append(np.array((len(s_cellii) - 1) * [skin]), np.array([spar]))
+    cell_i_coordinates = booms[n_bottom:] + booms[:n_top + 1]
+    cell_ii_coordinates = booms[n_top:n_bottom + 1]
 
-    cellii_coordinates = booms[n_top:n_bottom + 1]
+    area_i = np.pi * ((h_a / 2) ** 2) / 2
+    area_ii = h_a * (c_a - (h_a / 2))
 
-    areai = np.pi * ((h_a / 2) ** 2) / 2
-    areaii = h_a * (c_a - (h_a / 2))
-
-    return [base_q_celli, s_celli, t_celli, celli_coordinates, areai], \
-           [base_q_cellii, s_cellii, t_cellii, cellii_coordinates, areaii]
+    return [base_q_cell_i, s_cell_i, t_cell_i, cell_i_coordinates, area_i], \
+           [base_q_cell_ii, s_cell_ii, t_cell_ii, cell_ii_coordinates, area_ii]
 
 
 def area_triangle(pos1, pos2, pos3):
@@ -125,35 +123,35 @@ def sum_moments_ii(base_flow, constant_flow, cell_area, pos, summation_point, c_
 
 def get_shear_flows(b, areas, i_zz, t_skin, d, top, bottom, h_a, t_spar, c_a):
     q_diff = q_b(b, areas, i_zz)
-    
-    celli, cellii = cell_separation(t_skin, q_diff, d, top, bottom, h_a, t_spar, h_a, c_a, b)
-    
-    qsi = np.array([q_s0(celli[0], celli[2], celli[1])])
-    qsii = np.array([q_s0(cellii[0], cellii[2], cellii[1])])
-    
-    sys = np.array([[qsi[0][0], qsi[0][1]], [qsii[0][0], qsii[0][1]]])
-    sys_vec = np.array([[-qsi[0][2]], [-qsii[0][2]]])
-    
+
+    cell_i, cell_ii = cell_separation(t_skin, q_diff, d, top, bottom, h_a, t_spar, h_a, c_a, b)
+
+    qs_i = np.array([q_s0(cell_i[0], cell_i[2], cell_i[1])])
+    qs_ii = np.array([q_s0(cell_ii[0], cell_ii[2], cell_ii[1])])
+
+    sys = np.array([[qs_i[0][0], qs_i[0][1]], [qs_ii[0][0], qs_ii[0][1]]])
+    sys_vec = np.array([[-qs_i[0][2]], [-qs_ii[0][2]]])
+
     values = np.linalg.solve(sys, sys_vec)
-    
-    return values, celli, cellii
+
+    return values, cell_i, cell_ii
 
 
-def summing_moments(constants, celli, cellii, z_pos):
-    moments_i = sum_moments_i(celli[0], constants[0][0], celli[4], celli[1], height)
-    moments_ii = sum_moments_ii(cellii[0], constants[1][0], cellii[4], cellii[3], [height / 2, 0], chord)
+def summing_moments(constants, cell_i, cell_ii, z_pos):
+    moments_i = sum_moments_i(cell_i[0], constants[0][0], cell_i[4], cell_i[1], height)
+    moments_ii = sum_moments_ii(cell_ii[0], constants[1][0], cell_ii[4], cell_ii[3], [height / 2, 0], chord)
 
-    z_pos_sc = ((moments_i + moments_ii) / -1 + (height / 2)) - z_pos
+    z_pos_sc = z_pos - ((moments_i + moments_ii) / -1 + (height / 2))
 
     return z_pos_sc
 
 
 # pre shear-flow calculations
-n_booms = 20
-boom_distances, boom_areas, top_spar, bottom_spar = get_boom_information(n_booms)
-z_pos, booms_pos = get_cg(n_booms)
-izz, iyy = get_moi(n_booms)
+n_booms = 260
+b, boom_distances, boom_areas, top_spar, bottom_spar = get_boom_information(n_booms)
+z_pos, boom_locations = get_cg(n_booms)
 
+izz, iyy = get_moi(n_booms)
 # required parameters
 height = 0.173
 chord = 0.484
@@ -162,9 +160,14 @@ spar_t = 2.5 / 1000
 
 
 def get_shear_center():
-    constant, first_cell, second_cell = get_shear_flows(booms_pos, boom_areas, izz, skin_t, boom_distances, top_spar,
+    constant, first_cell, second_cell = get_shear_flows(boom_locations, boom_areas, izz, skin_t, boom_distances,
+                                                        top_spar,
                                                         bottom_spar, height, spar_t, chord)
 
     shear_center = summing_moments(constant, first_cell, second_cell, z_pos)
 
     return shear_center
+
+
+sc_z = get_shear_center()
+print(sc_z)

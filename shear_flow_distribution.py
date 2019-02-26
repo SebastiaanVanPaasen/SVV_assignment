@@ -124,12 +124,14 @@ class Shear:
         area_ii = self.h_a * (self.c_a - (self.h_a / 2))
         self.cell_ii.append(area_ii)
 
-        base_q_cell_i = np.append(base_q[n_bottom:], base_q[:n_top])
+        base_q_cell_i = np.append(base_q[n_bottom + 1:], base_q[:n_top + 1])
         base_q_cell_i = np.append(base_q_cell_i, np.array([0]))
-        base_q_cell_ii = np.append(base_q[n_top:n_bottom], np.array([0]))
+        base_q_cell_ii = np.append(base_q[n_top + 1:n_bottom + 1], np.array([0]))
 
         self.cell_i.append(base_q_cell_i)
         self.cell_ii.append(base_q_cell_ii)
+
+        return self.cell_i, self.cell_ii
 
     @staticmethod
     def q_b(booms, areas, i_zz, i_yy, v_y, v_z):
@@ -137,18 +139,16 @@ class Shear:
 
         alpha = -v_y / i_zz
         beta = -v_z / i_yy
-        value = 0
 
         for i in range(len(booms)):
             delta_q = alpha * booms[i][1] * areas[i] + beta * booms[i][0] * areas[i]
-            value += delta_q
-            diff_q[i] = value
+            diff_q[i] = delta_q
 
         base_q = np.zeros(len(booms))
-        start = 0
+        previous = diff_q[0]
         for i in range(1, len(diff_q)):
-            base_q[i] = diff_q[i] - start
-            start = diff_q[i]
+            base_q[i] = previous + diff_q[i]
+            previous = diff_q[i]
 
         return base_q
 

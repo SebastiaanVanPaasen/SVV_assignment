@@ -247,8 +247,6 @@ class Idealization:
         """
         nom = 0
         denom = 0
-        print(len(pos))
-        print(len(area))
 
         for i in range(len(pos)):
             nom += area[i] * pos[i][0]
@@ -287,22 +285,23 @@ def get_booms(n_booms):
     ideal = Idealization(n_booms)
     booms, distances = ideal.set_boom_locations()
     areas = ideal.calculate_boom_area(booms)
-    booms, distances, areas_y, top, bottom = ideal.add_spar_booms(booms, distances, areas)
+    boom_locations, distances, areas, top, bottom = ideal.add_spar_booms(booms, distances, areas)
     # areas_z = ideal.calculate_boom_area_z(booms, top, bottom)
 
-    return booms, areas, ideal
+    return boom_locations, areas, ideal
 
 
 def get_cg(n_booms):
     booms, areas, ideal = get_booms(n_booms)
-    z_pos, booms = ideal.calculate_cg(booms, areas)
+    z_pos, boom_locations = ideal.calculate_cg(booms, areas)
 
-    return z_pos, booms, ideal, areas
+    return z_pos, boom_locations
 
 
 def get_moi(n_booms):
-    z_pos, booms, ideal, areas = get_cg(n_booms)
-    izz, iyy = ideal.calculate_moi(booms, areas)
+    booms, areas, ideal = get_booms(n_booms)
+    z_pos, boom_locations = get_cg(n_booms)
+    izz, iyy = ideal.calculate_moi(boom_locations, areas)
 
     return izz, iyy
 
@@ -311,9 +310,9 @@ def get_boom_information(n_booms):
     ideal = Idealization(n_booms)
     booms, distances = ideal.set_boom_locations()
     areas = ideal.calculate_boom_area(booms)
-    booms, distances, areas, top, bottom = ideal.add_spar_booms(booms, distances, areas)
+    boom_locations, distances, areas, top, bottom = ideal.add_spar_booms(booms, distances, areas)
 
-    return distances, areas, top, bottom
+    return boom_locations, distances, areas, top, bottom
 
 
 # def plotting(booms):
