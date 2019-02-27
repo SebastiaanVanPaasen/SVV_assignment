@@ -74,26 +74,26 @@ def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a, bo
     bottom_locations = s[n_bottom:]
     top_locations = s[:n_top + 1]
 
-    distances_cell_i_bottom = np.zeros(len(bottom_locations))
+    s_cell_i_bottom = np.zeros(len(bottom_locations))
     for i in range(len(bottom_locations) - 1):
-        distances_cell_i_bottom[i] = bottom_locations[i + 1] - bottom_locations[i]
-    distances_cell_i_bottom[-1] += top_locations[0] * 2
+        s_cell_i_bottom[i] = bottom_locations[i + 1] - bottom_locations[i]
+    s_cell_i_bottom[-1] += top_locations[0] * 2
 
-    distances_cell_i_top = np.zeros(len(top_locations) - 1)
+    s_cell_i_top = np.zeros(len(top_locations) - 1)
     for i in range(len(top_locations) - 1):
-        distances_cell_i_top[i] = top_locations[i + 1] - top_locations[i]
+        s_cell_i_top[i] = top_locations[i + 1] - top_locations[i]
 
-    distances_cell_i = np.append(np.append(distances_cell_i_bottom, distances_cell_i_top), np.array([d_spar]))
+    s_cell_i = np.append(np.append(s_cell_i_bottom, s_cell_i_top), np.array([d_spar]))
 
-    distances_cell_ii_locations = s[n_top:n_bottom + 1]
-    distances_cell_ii = np.zeros(len(distances_cell_ii_locations) - 1)
-    for i in range(len(distances_cell_ii_locations) - 1):
-        distances_cell_ii[i] = distances_cell_ii_locations[i + 1] - distances_cell_ii_locations[i]
+    s_cell_ii_locations = s[n_top:n_bottom + 1]
+    s_cell_ii = np.zeros(len(s_cell_ii_locations) - 1)
+    for i in range(len(s_cell_ii_locations) - 1):
+        s_cell_ii[i] = s_cell_ii_locations[i + 1] - s_cell_ii_locations[i]
 
-        distances_cell_ii = np.append(distances_cell_ii, np.array([d_spar]))
+    s_cell_ii = np.append(s_cell_ii, np.array([d_spar]))
 
-    t_cell_i = np.append(np.array((len(distances_cell_i) - 1) * [skin]), np.array([spar]))
-    t_cell_ii = np.append(np.array((len(distances_cell_ii) - 1) * [skin]), np.array([spar]))
+    t_cell_i = np.append(np.array((len(s_cell_i) - 1) * [skin]), np.array([spar]))
+    t_cell_ii = np.append(np.array((len(s_cell_ii) - 1) * [skin]), np.array([spar]))
 
     cell_i_coordinates = booms[n_bottom:] + booms[:n_top + 1]
     cell_ii_coordinates = booms[n_top:n_bottom + 1]
@@ -101,8 +101,8 @@ def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a, bo
     area_i = np.pi * ((h_a / 2) ** 2) / 2
     area_ii = h_a * (c_a - (h_a / 2))
 
-    return [base_q_cell_i, distances_cell_i, t_cell_i, cell_i_coordinates, area_i], \
-           [base_q_cell_ii, distances_cell_ii, t_cell_ii, cell_ii_coordinates, area_ii]
+    return [base_q_cell_i, s_cell_i, t_cell_i, cell_i_coordinates, area_i], \
+           [base_q_cell_ii, s_cell_ii, t_cell_ii, cell_ii_coordinates, area_ii]
 
 
 def area_triangle(pos1, pos2, pos3):

@@ -349,12 +349,33 @@ print("izz : " + str(moi_zz))
 print("iyy : " + str(moi_yy))
 # ----------------------------------------------------------------------------------------------------------------------
 
+
+def normal_stress(moment_y, moment_z, moi, booms_geometry):
+    sigma_x = np.zeros((len(booms_geometry)))
+    for i in range(len(booms_geometry)):
+        sigma_x[i] = (moment_y / moi[0]) * booms_geometry[i][0] + (moment_z / moi[1]) * booms_geometry[i][1]
+
+    return sigma_x
+
+
+def von_misses_stress(n_stress, shear_stress_1):
+    von_mis_stress = np.zeros(np.shape(n_stress))
+    for i in range(len(n_stress)):
+        for j in range(len(n_stress[i])):
+            print(shear_stress_1[i][j])
+            von_mis_stress[i][j] = np.sqrt(0.5 * (n_stress[i][j] * n_stress[i][j]) +
+                                           3 * shear_stress_1[i][j] * shear_stress_1[i][j])
+    return von_mis_stress
+
+
 slice_list = []
 slice_app_force = []  # unnecessary
 twist = []
 shear_flows = []
 shear_stress_yz = []
 shear_stress_xy = []
+sigma = []
+v_m = []
 for i in range(total_n):
     slice_list.append(Slice([x_slice[i], 0, sc_z], d_x))
     slice_app_force.append(slice_list[i].int_dist(forces, l_a))
@@ -364,10 +385,16 @@ for i in range(total_n):
     m_y[i] = slice_list[i].my
     m_x[i] = slice_list[i].mx
 
-    flow_i_shear, flow_ii_shear, twist_shear = get_shear_flow(n_booms, v_y[i], v_z[i], [x_slice[i], 0, sc_z])
+    flow_i_shear, flow_ii_shear, twist_shear, boom_loc_i, boom_loc_ii = get_shear_flow(n_booms, v_y[i], v_z[i],
+                                                                                       [x_slice[i], 0, sc_z])
     flow_i_torque, flow_ii_torque, twist_torque = get_torque(n_booms, m_x[i])
 
+    sigma_i = normal_stress(m_y[i], m_z[i], [moi_yy, moi_zz], boom_loc_i)
+    sigma_ii = normal_stress(m_y[i], m_z[i], [moi_yy, moi_zz], boom_loc_ii)
+
+    sigma.append([sigma_i, sigma_ii])
     twist.append(twist_shear + twist_torque)
+
     shear_flows.append([np.add(flow_i_shear, flow_i_torque), np.add(flow_ii_shear, flow_ii_torque)])
     shear_stress_yz.append([np.divide(np.add(flow_i_shear, flow_i_torque), t_skin),
                             np.divide(np.add(flow_ii_shear, flow_ii_torque), t_skin)])
@@ -375,13 +402,17 @@ for i in range(total_n):
     shear_stress_yz[i][0][-1] = shear_stress_yz[i][0][-1] * t_skin / t_spar
     shear_stress_yz[i][1][-1] = shear_stress_yz[i][1][-1] * t_skin / t_spar
 
+    v_m.append(von_misses_stress(sigma[i], shear_stress_yz[i]))
+
 
 # print("the twist : " + str(twist))
 # print("shear flows : " + str(shear_flows))
 # print("shear stress : " + str(shear_stress))
-
+# print("normal stress : " + str(sigma))
+print("von misses stress : " + str(v_m))
 
 # deflection in y
+
 
 def eq_def_y(x, constant):
     return 1 / (E * izz) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
@@ -411,25 +442,10 @@ plt.plot(x_slice, d_y)
 
 
 def absolute_def(span_defy, span_defz, twist, shear_center):
-    dy_le = span_defy - h_a/2*np.sin(np.radians(theta)) - (h_a/2-shear_center[2])*np.sin(twist)
-    dy_te = span_defy + (c_a-h_a/2)*np.sin(np.radians(theta)) + (c_a-h_a/2+shear_center[2])*np.sin(twist)
-    dz_le = span_defz - (h_a/2)*np.cos(np.radians(theta)) - (np.cos(np.radians(theta))-1)*(h_a/2-shear_center[1])
-    dz_te = span_defz + (c_a-h_a/2)*np.cos(np.radians(theta)) + (np.cos(np.radians(theta))-1)*(c_a-h_a/2+shear_center[1])
+    dy_le = span_defy - h_a / 2 * np.sin(np.radians(theta)) - (h_a / 2 - shear_center[2]) * np.sin(twist)
+    dy_te = span_defy + (c_a - h_a / 2) * np.sin(np.radians(theta)) + (c_a - h_a / 2 + shear_center[2]) * np.sin(twist)
+    dz_le = span_defz - (h_a / 2) * np.cos(np.radians(theta)) - (np.cos(np.radians(theta)) - 1) * (
+            h_a / 2 - shear_center[1])
+    dz_te = span_defz + (c_a - h_a / 2) * np.cos(np.radians(theta)) + (np.cos(np.radians(theta)) - 1) * (
+            c_a - h_a / 2 + shear_center[1])
     return dy_le, dy_te, dz_le, dz_te
-
-
-def normal_stress(momenty, momentz, moi, booms_geometry):
-    sigma_x = np.zeros((len(momenty), len(booms_geometry)))
-    for i in range(len(momenty)):
-        for j in range(len(booms_geometry)):
-            sigma_x[i][j] = momenty[i] / moi[0] * booms_geometry[1] + momentz[i] / moi[1] * booms_geometry[0]
-    return sigma_x
-
-
-def von_mises_stres(normal_stress, shear_stress_1):
-    vonmis_stress = np.zeros(np.shape(normal_stress))
-    for i in range(len(normal_stress[0])):
-        for j in range(len(normal_stress[1])):
-            vonmis_stress[i][j] = np.sqrt(0.5 * (normal_stress[i][j] * normal_stress[i][j]) +
-                                          3 * shear_stress_1[i][j] * shear_stress_1[i][j])
-    return vonmis_stress

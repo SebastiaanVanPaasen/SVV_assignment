@@ -237,4 +237,4 @@ def get_shear_flow(n_booms, v_y, v_z, position):
     q_flow_i[-1] = q_flow_i[-1] - final_shear_values[1]
     q_flow_ii[-1] = q_flow_ii[-1] - final_shear_values[0]
 
-    return q_flow_i, q_flow_ii, final_shear_values[2]
+    return q_flow_i, q_flow_ii, final_shear_values[2], cell_i[2], cell_ii[2]
