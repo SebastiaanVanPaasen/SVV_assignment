@@ -1,7 +1,8 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from scipy.interpolate import griddata
+import bottleneck as bn
 
 
 # <editor-fold desc="SCRAP">
@@ -36,12 +37,12 @@ def read_table_vali(filename,
 
 
 def get_deformation(case):
-    # output: returns an array with deformation_data[node label][magnitude def][x def][y def][z def] and deformation[node label][x total][y total][z total]
+    # output: returns an array with deformation_data[node label][magnitude def][x def][y def][z def] and
+    # deformation[node label][x total][y total][z total]
     filename = str(case) + ".txt"
     nodes = read_table_vali("inp.txt", False)
     deformation_data = read_table_vali(filename, True)
     deformation_data = np.delete(deformation_data, [1, 2, 3, 4], 0)
-    print(deformation_data)
 
     x = nodes[1] + deformation_data[2]
     y = nodes[2] + deformation_data[3]
@@ -110,13 +111,16 @@ def get_elements(case):
         element_pos[3] = np.append(element_pos[3], z)
     return element_pos
 
+def get_nodes():
+    nodes = read_table_vali("inp.txt", False)
+    return nodes
 
 # </editor-fold>
 
 
 # <editor-fold desc="PLOT METHODS">
-def plot_node_pos():
-    nodes = read_table_vali("inp.txt", False)
+def plot_node_pos(nodes,LE,TE):
+
     color = []
     for i in nodes[0]:
         color.append((0., i / max(nodes[0]), 0.))
@@ -125,7 +129,9 @@ def plot_node_pos():
     ax = fig.gca(projection='3d')
     ax.set_aspect('equal')
 
-    ax.scatter(nodes[1], nodes[2], nodes[3], zdir="z", s=2, c=color)
+    ax.scatter(nodes[1], nodes[2], nodes[3], zdir="z", s=2, c="grey")
+    ax.scatter(LE[1], LE[2], LE[3], zdir="z", s=10, c="red")
+    ax.scatter(TE[1], TE[2], TE[3], zdir="z", s=10, c="blue")
 
     max_range = np.array(
         [nodes[1].max() - nodes[1].min(), nodes[2].max() - nodes[2].min(), nodes[3].max() - nodes[3].min()]).max() / 2.0
@@ -144,9 +150,7 @@ def plot_node_pos():
     return
 
 
-def plot_deformation(case):  # use case variable like "UR1", only will work with U...
-    deformation, deformation_data = get_deformation(case)
-
+def plot_deformation(deformation, deformation_data):  # use case variable like "UR1", only will work with U...
     color = []
     for i in deformation_data[1]:
         color.append((0., i / max(deformation_data[1]), 0.))
@@ -155,7 +159,7 @@ def plot_deformation(case):  # use case variable like "UR1", only will work with
     ax = fig.gca(projection='3d')
     ax.set_aspect('equal')
 
-    ax.scatter(deformation[1], deformation[2], deformation[3], zdir="z", s=2, c=color)
+    ax.scatter(deformation[1], deformation[2], deformation[3], zdir="z", s=10, c=color)
 
     max_range = np.array(
         [deformation[1].max() - deformation[1].min(), deformation[2].max() - deformation[2].min(),
@@ -175,8 +179,7 @@ def plot_deformation(case):  # use case variable like "UR1", only will work with
     return
 
 
-def plot_von_mieses_stress(case):
-    stress = get_von_mieses_stress(case)
+def plot_von_mieses_stress(stress):
 
     color = []
     for i in stress[4]:
@@ -208,6 +211,13 @@ def plot_von_mieses_stress(case):
 
 
 # <editor-fold desc="VALIDATION METHODS">
+def reshape_data_grid(data): #must be 4D array, discards 1st subarray
+    flat_data=np.array([])
+    for i in range(len(data[0])):
+        flat_data= np.append(flat_data,np.array([data[1,i],data[2,i],data[3,i]]))
+    data = np.reshape(flat_data, (len(data[0]), 3), order="A")
+    return data
+
 #TODO: {switch coordinate frames}, interpolate, compute new value at comparison points, calculate MPE
 
 def coordiant_transform(x,y,z):
@@ -220,9 +230,68 @@ def validate():
     # plot_node_pos()
     # for i in ["UR1", "UR2", "ULC1", "ULC2", ]:
     #     plot_deformation(i)
-    for i in ["SR1", "SR2", "SLC1", "SLC2", ]:
-        plot_von_mieses_stress(i)
+    # for i in ["SR1", "SR2", "SLC1", "SLC2", ]:
+    #     plot_von_mieses_stress(i)
     # get_elements('elements')
+
+    nodes=get_nodes()
+    deformation , deformation_data = get_deformation("UR1")
+    deformation_data = np.delete(deformation_data, 1, axis=1)
+    index_sorted=np.argsort(nodes[3])
+    print(index_sorted)
+    print(nodes[0,index_sorted])
+
+    index_LE = np.flip(index_sorted,axis=0)[..., 0:68].astype(int)
+
+    index_TE = index_sorted[..., 0:68].astype(int)
+
+    print(index_LE)
+    print(index_TE)
+
+    print(deformation)
+    deformation=deformation[...,index_LE]
+    deformation_data=deformation_data[...,index_LE]
+
+    plot_deformation(deformation,deformation_data)
+
+    y_def_LE = deformation[1]
+    z_def_LE = deformation[2]
+    y_def_TE = deformation[2]
+    z_def_TE = deformation[3]
+
+    plt.scatter(y_def_LE,z_def_LE)
+    plt.show()
+
+    # LE = np.array([np.flip(nodes[0][index_sorted],axis=0),np.flip(nodes[1][index_sorted],axis=0),np.flip(nodes[2][index_sorted],axis=0),np.flip(nodes[3][index_sorted],axis=0)])
+    # TE = np.array([nodes[0][index_sorted], nodes[1][index_sorted],nodes[2][index_sorted],nodes[3][index_sorted]])
+    # # print(LE)
+    # # print(TE)
+    #
+    #
+    # LE = LE[...,0:68]
+    # TE = TE[..., 0:68]
+    # print(LE)
+    # print(TE)
+    # #print(nodes_sorted)
+    # plot_node_pos(nodes,LE,TE)
+
+    # nodes=reshape_data_grid(get_nodes())
+    # deformation, deformation_data = get_deformation("UR1")
+    # deformation = np.delete(deformation_data,1,axis=1)
+    #
+    # deformation = reshape_data_grid(deformation)
+
+    # test_points= np.random.rand(len(get_nodes()[0]),3)
+    # test_points= test_points + nodes
+    #
+    # nodes = np.delete(nodes,-1,axis=0)
+    # test_points = np.delete(test_points,-1,axis=0)
+    # # print(len(nodes))
+    # # print(len(deformation))
+    # # print(len(test_points))
+    # def_interpoled=griddata(nodes,deformation,test_points)
+    # print(def_interpoled)
+    return
 
 # </editor-fold>
 
