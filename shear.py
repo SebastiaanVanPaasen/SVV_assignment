@@ -1,7 +1,4 @@
-import math
-import numpy as np
-#from SVV_assignment.SVV_assignment.geometry import *
-from geometry import *
+from SVV_assignment.SVV_assignment.geometry import *
 
 class Shear:
 
@@ -15,6 +12,15 @@ class Shear:
         self.shear_mod = 23 * 10 ** 9
 
     def create_cell_properties(self, s, b, n_top, n_bottom, base_q):
+        """
+
+        :param s:
+        :param b:
+        :param n_top:
+        :param n_bottom:
+        :param base_q:
+        :return:
+        """
         bottom_locations = s[n_bottom:]
         top_locations = s[:n_top + 1]
 
@@ -61,6 +67,7 @@ class Shear:
         self.cell_ii.append(base_q_cell_ii)
 
         return self.cell_i, self.cell_ii
+
     @staticmethod
     def q_b(booms, areas, i_zz, i_yy, v_y, v_z):
         diff_q = np.zeros(len(booms))
@@ -166,7 +173,7 @@ def get_shear_flow(n_booms, v_y, v_z, position):
     q_base_i = np.array(cell_i[4])
     q_base_ii = np.array(cell_ii[4])
 
-    q_flow_i = np.add(q_base_i , final_shear_values[0])
-    q_flow_ii = np.add(q_base_ii , final_shear_values[1])
+    q_flow_i = np.add(q_base_i, final_shear_values[0])
+    q_flow_ii = np.add(q_base_ii, final_shear_values[1])
 
     return q_flow_i, q_flow_ii, final_shear_values[2]

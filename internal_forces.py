@@ -2,20 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-# from SVV_assignment.SVV_assignment.geometry import *
-# from SVV_assignment.SVV_assignment.shear import get_shear_flow
-# from SVV_assignment.SVV_assignment.torque import get_torque
-# from SVV_assignment.SVV_assignment.shear_center import *
+from SVV_assignment.SVV_assignment.shear import get_shear_flow
+from SVV_assignment.SVV_assignment.torque import get_torque
+from SVV_assignment.SVV_assignment.shear_center import *
 
-from geometry import *
-from shear_center import *
-from torque import get_torque
-from shear import get_shear_flow
+# from shear_center import *
+# from torque import get_torque
+# from shear import get_shear_flow
 
 # aileron parameters
 l_a = 1.691
 h_a = 0.173
 c_a = 0.484
+t_skin = 1.1 / 1000
+t_spar = 2.5 / 1000
 
 # force locations along the beam
 x_begin = 0
@@ -46,7 +46,7 @@ delta_3 = 0.0203
 delta_3y = delta_3 * np.cos(np.radians(theta))
 delta_3z = -delta_3 * np.sin(np.radians(theta))
 
-izz, iyy =  5.697e-6, 6.947e-5 #get_moi(20)
+izz, iyy = 5.697e-6, 6.947e-5  # get_moi(20)
 
 
 class Force:
@@ -338,23 +338,22 @@ m_x = np.zeros(total_n)
 
 # ----------------------------------------------------------------------------------------------------------------------
 n_booms = 260
-# torque = torque.Torque()
-# shear = shear.Shear()
-
 cg_z, boom_locations = get_cg(n_booms)
 moi_zz, moi_yy = get_moi(n_booms)
 boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
 sc_z = get_shear_center()
 
 print("sc : " + str(sc_z))
-print("izz : " + str(moi_zz), "\n  iyy : " + str(moi_yy))
-print("boom locations : " + str(boom_locations))
+print("izz : " + str(moi_zz))
+print("iyy : " + str(moi_yy))
 # ----------------------------------------------------------------------------------------------------------------------
 
 slice_list = []
 slice_app_force = []  # unnecessary
 twist = []
 shear_flows = []
+shear_stress_yz = []
+shear_stress_xy = []
 for i in range(total_n):
     slice_list.append(Slice([x_slice[i], 0, sc_z], d_x))
     slice_app_force.append(slice_list[i].int_dist(forces, l_a))
@@ -369,53 +368,45 @@ for i in range(total_n):
 
     twist.append(twist_shear + twist_torque)
     shear_flows.append([np.add(flow_i_shear, flow_i_torque), np.add(flow_ii_shear, flow_ii_torque)])
+    shear_stress_yz.append([np.divide(np.add(flow_i_shear, flow_i_torque), t_skin),
+                         np.divide(np.add(flow_ii_shear, flow_ii_torque), t_skin)])
+
+    shear_stress_yz[i][0][-1] = shear_stress_yz[i][0][-1] * t_skin / t_spar
+    shear_stress_yz[i][1][-1] = shear_stress_yz[i][1][-1] * t_skin / t_spar
 
 
+# print("the twist : " + str(twist))
+# print("shear flows : " + str(shear_flows))
+# print("shear stress : " + str(shear_stress))
 
-
-
-# slice_list_global = []
-# slice_app_force_global = []  # unnecessary
-# for i in range(total_n):
-#    slice_list_global.append(Slice([x_slice[i], 0, 0], d_x))
-#    slice_app_force_global.append(slice_list_global[i].int_dist(forces_global, l_a))
-#    v_y[i] = slice_list_global[i].vy
-#    v_z[i] = slice_list_global[i].vz
-#    m_z[i] = slice_list_global[i].mz
-#    m_y[i] = slice_list_global[i].my
-#    m_x[i] = slice_list_global[i].mx
-
-
-# f1 = plt.figure()
-# plt.plot(x_slice, v_z)
-# f2 = plt.figure()
-# plt.plot(x_slice, m_y)
-# plt.show()
 
 # deflection in y
+
 def eq_def_y(x, constant):
     return 1 / (E * izz) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                       forces[1].y * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
                                       forces[2].y * ((x - x_3) ** 3) * np.heaviside(x - x_3, 1) +
                                       forces[6].y * ((x - x_a1) ** 3) * np.heaviside(x - x_a1, 1) +
                                       forces[8].y * ((x - x_a2) ** 3) * np.heaviside(x - x_a2, 1)) + qy / 24 * (
-                                         x ** 4) + constant[0] * x + constant[1])
+                                     x ** 4) + constant[0] * x + constant[1])
 
 
 # deflection in z
+
+
 def eq_def_z(x, constant):
     return 1 / (E * iyy) * (-1 / 6 * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                        forces[4].z * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
                                        forces[5].z * ((x - x_3) ** 3) * np.heaviside(x - x_3, 1) +
                                        forces[7].z * ((x - x_a1) ** 3) * np.heaviside(x - x_a1, 1) +
                                        forces[9].z * ((x - x_a2) ** 3) * np.heaviside(x - x_a2, 1)) - qz / 24 * (
-                                         x ** 4) + constant[0] * x + constant[1])
+                                     x ** 4) + constant[0] * x + constant[1])
 
 
 d_y = eq_def_y(x_slice, int_constant_y)
 d_z = eq_def_z(x_slice, int_constant_z)
 plt.plot(x_slice, d_z)
-plt.plot(x_slice,d_y)
+plt.plot(x_slice, d_y)
 
 
 def absolute_def(span_defy, span_defz, twist, shear_center):
