@@ -1,17 +1,26 @@
-#from SVV_assignment.SVV_assignment.geometry import *
+from SVV_assignment.SVV_assignment.geometry import *
+import numpy as np
 
-from geometry import *
+# from geometry import *
 
 
-def q_b(booms, area, moi):
-    diff_q = np.zeros(len(booms))
+def q_b(boom_locations, area, moi):
+    """
+    Calculates the base shear flow due to a dummy force of 1 N.
+
+    :param boom_locations: List of float lists, containing all the locations of the booms around the cross-section.
+    :param area: List of floats, containing the areas of all the booms around the cross-section.
+    :param moi: Float, representing the moment of inertia around the z-axis.
+    :return: List of floats, containing the base shear flows around the cross-section.
+    """
+    diff_q = np.zeros(len(boom_locations))
 
     alpha = -1 / moi
-    for i in range(len(booms)):
-        delta_q = alpha * booms[i][1] * area[i]
+    for i in range(len(boom_locations)):
+        delta_q = alpha * boom_locations[i][1] * area[i]
         diff_q[i] = delta_q
 
-    base_q = np.zeros(len(booms))
+    base_q = np.zeros(len(boom_locations))
     previous = diff_q[0]
     for i in range(1, len(diff_q)):
         base_q[i] = previous + diff_q[i]
@@ -23,6 +32,14 @@ def q_b(booms, area, moi):
 
 
 def q_s0(base_q, t, s):
+    """
+    Calculates the constant shear flow equations leaving them as unknowns in the equations.
+
+    :param base_q: List of floats, containing the base shear flows between all the booms in one cell.
+    :param t: List of floats, containing the thickness between all the booms in one cell.
+    :param s: List of floats, containing the distances between the booms in one cell.
+    :return: values for the two unknown shear flows and the numerical value due to the base shear flow.
+    """
     flow = np.multiply(base_q, s)
     flow = np.divide(flow, t)
 
@@ -34,6 +51,22 @@ def q_s0(base_q, t, s):
 
 
 def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a, booms):
+    """
+    Creates the cell parameters for both cells.
+
+    :param skin: Float, representing the thickness of the skin.
+    :param base_q: List of floats, representing all the base shear flows around the section.
+    :param s: List of floats, representing the circumferential positions of the booms around the section.
+    :param n_top: Integer, boom number of the boom at the top of the spar.
+    :param n_bottom: Integer, boom number of the boom at the bottom of the spar.
+    :param d_spar: Float, circumferential distance to the boom at the top of the spar.
+    :param spar: Float, representing the thickness of the spar.
+    :param h_a: Float, representing the height of the spar.
+    :param c_a: Float, representing the length of the chord.
+    :param booms: List of float lists, containing the locations of all the booms in the yz-coordinate frame.
+    :return: Two lists, containing the base shear flow, circumferential distances between booms, thickness of the
+    distances between the booms, the area of the cell and the coordinates of all the booms in the cell.
+    """
     base_q_cell_i = np.append(base_q[n_bottom + 1:], base_q[:n_top + 1])
     base_q_cell_i = np.append(base_q_cell_i, np.array([0]))
     base_q_cell_ii = np.append(base_q[n_top + 1:n_bottom + 1], np.array([0]))
@@ -41,26 +74,26 @@ def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a, bo
     bottom_locations = s[n_bottom:]
     top_locations = s[:n_top + 1]
 
-    s_cell_i_bottom = np.zeros(len(bottom_locations))
+    distances_cell_i_bottom = np.zeros(len(bottom_locations))
     for i in range(len(bottom_locations) - 1):
-        s_cell_i_bottom[i] = bottom_locations[i + 1] - bottom_locations[i]
-    s_cell_i_bottom[-1] += top_locations[0] * 2
+        distances_cell_i_bottom[i] = bottom_locations[i + 1] - bottom_locations[i]
+    distances_cell_i_bottom[-1] += top_locations[0] * 2
 
-    s_cell_i_top = np.zeros(len(top_locations) - 1)
+    distances_cell_i_top = np.zeros(len(top_locations) - 1)
     for i in range(len(top_locations) - 1):
-        s_cell_i_top[i] = top_locations[i + 1] - top_locations[i]
+        distances_cell_i_top[i] = top_locations[i + 1] - top_locations[i]
 
-    s_cell_i = np.append(np.append(s_cell_i_bottom, s_cell_i_top), np.array([d_spar]))
+    distances_cell_i = np.append(np.append(distances_cell_i_bottom, distances_cell_i_top), np.array([d_spar]))
 
-    s_cell_ii_locations = s[n_top:n_bottom + 1]
-    s_cell_ii = np.zeros(len(s_cell_ii_locations) - 1)
-    for i in range(len(s_cell_ii_locations) - 1):
-        s_cell_ii[i] = s_cell_ii_locations[i + 1] - s_cell_ii_locations[i]
+    distances_cell_ii_locations = s[n_top:n_bottom + 1]
+    distances_cell_ii = np.zeros(len(distances_cell_ii_locations) - 1)
+    for i in range(len(distances_cell_ii_locations) - 1):
+        distances_cell_ii[i] = distances_cell_ii_locations[i + 1] - distances_cell_ii_locations[i]
 
-    s_cell_ii = np.append(s_cell_ii, np.array([d_spar]))
+        distances_cell_ii = np.append(distances_cell_ii, np.array([d_spar]))
 
-    t_cell_i = np.append(np.array((len(s_cell_i) - 1) * [skin]), np.array([spar]))
-    t_cell_ii = np.append(np.array((len(s_cell_ii) - 1) * [skin]), np.array([spar]))
+    t_cell_i = np.append(np.array((len(distances_cell_i) - 1) * [skin]), np.array([spar]))
+    t_cell_ii = np.append(np.array((len(distances_cell_ii) - 1) * [skin]), np.array([spar]))
 
     cell_i_coordinates = booms[n_bottom:] + booms[:n_top + 1]
     cell_ii_coordinates = booms[n_top:n_bottom + 1]
@@ -68,8 +101,8 @@ def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a, bo
     area_i = np.pi * ((h_a / 2) ** 2) / 2
     area_ii = h_a * (c_a - (h_a / 2))
 
-    return [base_q_cell_i, s_cell_i, t_cell_i, cell_i_coordinates, area_i], \
-           [base_q_cell_ii, s_cell_ii, t_cell_ii, cell_ii_coordinates, area_ii]
+    return [base_q_cell_i, distances_cell_i, t_cell_i, cell_i_coordinates, area_i], \
+           [base_q_cell_ii, distances_cell_ii, t_cell_ii, cell_ii_coordinates, area_ii]
 
 
 def area_triangle(pos1, pos2, pos3):
@@ -151,7 +184,7 @@ def summing_moments(constants, cell_i, cell_ii, z_pos):
 # pre shear-flow calculations
 n_booms = 260
 b, boom_distances, boom_areas, top_spar, bottom_spar = get_boom_information(n_booms)
-z_pos, boom_locations = get_cg(n_booms)
+z_pos, boom_loc = get_cg(n_booms)
 
 izz, iyy = get_moi(n_booms)
 # required parameters
@@ -162,7 +195,7 @@ spar_t = 2.5 / 1000
 
 
 def get_shear_center():
-    constant, first_cell, second_cell = get_shear_flows(boom_locations, boom_areas, izz, skin_t, boom_distances,
+    constant, first_cell, second_cell = get_shear_flows(boom_loc, boom_areas, izz, skin_t, boom_distances,
                                                         top_spar,
                                                         bottom_spar, height, spar_t, chord)
 

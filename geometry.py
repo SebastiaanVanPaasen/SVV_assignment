@@ -120,6 +120,7 @@ class Idealization:
         """
         distance = self._calculate_boom_distance()
 
+        n_top_spar = 0
         for i in range(len(booms)):
             if booms[i][0] > self.h_a / 2:
                 n_top_spar = i
@@ -152,6 +153,7 @@ class Idealization:
 
         # print("the length of boom_areas is: " + str(len(boom_areas)))
 
+        n_bottom_spar = 0
         for i in range(len(booms)):
             if booms[i][1] < 0 and booms[i][0] < self.h_a / 2:
                 n_bottom_spar = i
@@ -166,13 +168,13 @@ class Idealization:
 
         area_before_top_spar = ((self.t_skin * distance) / 6) * (
                 2 + (booms[n_bottom_spar - 2][1] / booms[n_bottom_spar - 1][1])) + ((self.t_skin * (
-                                            distances[n_bottom_spar] - distances[n_bottom_spar - 1])) / 6) * (
+                                        distances[n_bottom_spar] - distances[n_bottom_spar - 1])) / 6) * (
                                        2 + (booms[n_bottom_spar][1] / booms[n_bottom_spar - 1][1]))
 
         area_after_top_spar = ((self.t_skin * distance) / 6) * (
                 2 + (booms[n_bottom_spar + 2][1] / booms[n_bottom_spar + 1][1])) + ((self.t_skin * (
-                                            distances[n_bottom_spar + 1] - distances[n_bottom_spar])) / 6) * (
-                                          2 + (booms[n_bottom_spar][1] / booms[n_bottom_spar + 1][1]))
+                                        distances[n_bottom_spar + 1] - distances[n_bottom_spar])) / 6) * (
+                                      2 + (booms[n_bottom_spar][1] / booms[n_bottom_spar + 1][1]))
 
         area_top_spar = ((self.t_skin * (distances[n_bottom_spar + 1] - distances[n_bottom_spar])) / 6) * \
                         (2 + (booms[n_bottom_spar + 1][1] / booms[n_bottom_spar][1])) + (
