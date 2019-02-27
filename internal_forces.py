@@ -6,9 +6,9 @@ import copy
 #from SVV_assignment.SVV_assignment.shear_flow_distribution import *
 #from SVV_assignment.SVV_assignment.shear_center import *
 
-from geometry import *
-from shear_flow_distribution import *
-from shear_center import *
+#from geometry import *
+#from shear_flow_distribution import *
+#from shear_center import *
 
 # aileron parameters
 l_a = 1.691
@@ -186,7 +186,7 @@ defl_y1 = 1 / 6 * np.array([(x_1 - x_1) ** 3 * np.heaviside(x_1 - x_1, 1),
                             0.,
                             6 * qy / 24 * (x_1 ** 4),
                             0.,
-                            E * izz * 6 * delta_1y])
+                            -E * izz * 6 * delta_1y])
 
 defl_y2 = 1 / 6 * np.array([(x_2 - x_1) ** 3 * np.heaviside(x_2 - x_1, 1),
                             (x_2 - x_2) ** 3 * np.heaviside(x_2 - x_2, 1),
@@ -211,7 +211,7 @@ defl_y3 = 1 / 6 * np.array([(x_3 - x_1) ** 3 * np.heaviside(x_3 - x_1, 1),
                             0.,
                             6 * qy / 24 * (x_3 ** 4),
                             0.,
-                            E * izz * 6 * delta_3y])
+                            -E * izz * 6 * delta_3y])
 
 defl_z1 = 1 / 6 * np.array([0., 0., 0.,
                             -(x_1 - x_1) ** 3 * np.heaviside(x_1 - x_1, 1),
@@ -224,7 +224,7 @@ defl_z1 = 1 / 6 * np.array([0., 0., 0.,
                             -forces[9].z * ((x_1 - x_a2) ** 3) * np.heaviside(x_1 - x_a2, 1),
                             0.,
                             -6 * qz / 24 * (x_1 ** 4),
-                            E * iyy * 6 * delta_1z])
+                            -E * iyy * 6 * delta_1z])
 
 defl_z2 = 1 / 6 * np.array([0., 0., 0.,
                             -(x_2 - x_1) ** 3 * np.heaviside(x_2 - x_1, 1),
@@ -250,7 +250,7 @@ defl_z3 = 1 / 6 * np.array([0., 0., 0.,
                             -forces[9].z * ((x_3 - x_a2) ** 3) * np.heaviside(x_3 - x_a2, 1),
                             0.,
                             -6 * qz / 24 * (x_3 ** 4),
-                            E * iyy * 6 * delta_3z])
+                            -E * iyy * 6 * delta_3z])
 
 trig = np.zeros(16)
 trig[6] = np.cos(np.radians(theta))
@@ -354,7 +354,7 @@ for i in range(total_n):
 
 # deflection in y
 def eq_def_y(x, constant):
-    return -1 / (E * izz) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
+    return 1 / (E * izz) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                       forces[1].y * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
                                       forces[2].y * ((x - x_3) ** 3) * np.heaviside(x - x_3, 1) +
                                       forces[6].y * ((x - x_a1) ** 3) * np.heaviside(x - x_a1, 1) +
@@ -364,7 +364,7 @@ def eq_def_y(x, constant):
 
 # deflection in z
 def eq_def_z(x, constant):
-    return -1 / (E * iyy) * (-1 / 6 * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
+    return 1 / (E * iyy) * (-1 / 6 * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                        forces[4].z * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
                                        forces[5].z * ((x - x_3) ** 3) * np.heaviside(x - x_3, 1) +
                                        forces[7].z * ((x - x_a1) ** 3) * np.heaviside(x - x_a1, 1) +
@@ -378,7 +378,16 @@ plt.plot(x_slice, d_z)
 plt.plot(x_slice,d_y)
 
 
+def absolute_def(span_defy, span_defz, twist, shear_center):
+    dy_le = span_defy - h_a/2*np.sin(np.radians(theta)) - (h_a/2-shear_center[2])*np.sin(twist)
+    dy_te = span_defy + (c_a-h_a/2)*np.sin(np.radians(theta)) + (c_a-h_a/2+shear_center[2])*np.sin(twist)
+    dz_le = span_defz
+    dz_te = span_defz
+    return dy_le, dy_te, dz_le, dz_te
+    
+# def normal_stress(momenty, momentz, moi, booms_geometry):
+#     for i in range(len(momenty)):
+#         for j in range(len(booms_geometry)):
+#
 
-#torque = Torque
-#shear = Shear
 

@@ -1,6 +1,6 @@
 import numpy as np
-from SVV_assignment.SVV_assignment.geometry import *
-
+#from SVV_assignment.SVV_assignment.geometry import *
+from geometry import *
 
 def q_b(booms, a, moi):
     diff_q = np.zeros(len(booms))
