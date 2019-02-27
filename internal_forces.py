@@ -2,15 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-# from SVV_assignment.SVV_assignment.geometry import *
-# from SVV_assignment.SVV_assignment.shear import get_shear_flow
-# from SVV_assignment.SVV_assignment.torque import get_torque
-# from SVV_assignment.SVV_assignment.shear_center import *
+from SVV_assignment.SVV_assignment.geometry import *
+from SVV_assignment.SVV_assignment.shear import get_shear_flow
+from SVV_assignment.SVV_assignment.torque import get_torque
+from SVV_assignment.SVV_assignment.shear_center import *
 
-from geometry import *
-from shear_center import *
-from torque import get_torque
-from shear import get_shear_flow
+# from geometry import *
+# from shear_center import *
+# from torque import get_torque
+# from shear import get_shear_flow
 
 # aileron parameters
 l_a = 1.691
@@ -121,7 +121,7 @@ class Force:
         return term
 
 
-def calc_reaction_forces():  #THIS ONE
+def calc_reaction_forces():  # THIS ONE
     y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
     # y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
     y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
@@ -141,7 +141,8 @@ def calc_reaction_forces():  #THIS ONE
     p_z = Force(abs(p * np.cos(np.radians(theta))), np.array([0, 0, -1]), np.array([x_a2, y_a1, z_a1]))
     q_y = Force(abs(q * np.cos(np.radians(theta)) * l_a), np.array([0, -1, 0]),
                 np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
-    q_z = Force(abs(q * np.sin(np.radians(theta)) * l_a), np.array([0, 0, 1]), np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
+    q_z = Force(abs(q * np.sin(np.radians(theta)) * l_a), np.array([0, 0, 1]),
+                np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
 
     forces = [y_1, y_2, y_3, z_1, z_2, z_3, a_1y, a_1z, p_y, p_z, q_y, q_z]
 
@@ -322,13 +323,13 @@ m_y = np.zeros(total_n)
 m_x = np.zeros(total_n)
 
 # ----------------------------------------------------------------------------------------------------------------------
-n_booms = 260
+n_booms = 26
 cg_z, boom_locations = get_cg(n_booms)
 moi_zz, moi_yy = get_moi(n_booms)
 boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
 sc_z = get_shear_center()
 
-print("sc : " + str(sc_z))
+print("sc with respect to the middle of the spar : " + str(sc_z))
 print("izz : " + str(moi_zz))
 print("iyy : " + str(moi_yy))
 # ----------------------------------------------------------------------------------------------------------------------
@@ -349,7 +350,7 @@ def von_misses_stress(n_stress, shear_stress_1):
         for j in range(len(n_stress[i])):
             # print(shear_stress_1[i][j])
             von_mis[j] = np.sqrt(0.5 * (n_stress[i][j] * n_stress[i][j]) +
-                                           3 * shear_stress_1[i][j] * shear_stress_1[i][j])
+                                 3 * shear_stress_1[i][j] * shear_stress_1[i][j])
         von_mis_stress.append(von_mis)
     return von_mis_stress
 
@@ -424,20 +425,28 @@ def eq_def_z(x, constant):
 
 d_y = eq_def_y(x_slice, int_constant_y)
 d_z = eq_def_z(x_slice, int_constant_z)
-#plt.plot(x_slice, d_z)
-#plt.plot(x_slice, d_y)
 
 
-def absolute_def(span_defy, span_defz, twist, shear_center):
-    for i in range(len(twist)):
-        dy_le = span_defy - h_a / 2 * np.sin(np.radians(theta)) - (h_a / 2 - shear_center) * np.sin(twist[i])
-        dy_te = span_defy + (c_a - h_a / 2) * np.sin(np.radians(theta)) + (c_a - h_a / 2 + shear_center) * np.sin(twist[i])
-        dz_le = span_defz - (h_a / 2) * np.cos(np.radians(theta)) - (np.cos(np.radians(twist[i])) - 1) * (
+# plt.plot(x_slice, d_z)
+# plt.plot(x_slice, d_y)
+
+
+def absolute_def(span_def_y, span_def_z, rotation, shear_center):
+    for i in range(len(rotation)):
+        dy_le = span_def_y - h_a / 2 * np.sin(np.radians(theta)) - (h_a / 2 - shear_center) * np.sin(rotation[i])
+        dy_te = span_def_y + (c_a - h_a / 2) * np.sin(np.radians(theta)) + (c_a - h_a / 2 + shear_center) * np.sin(
+            rotation[i])
+        dz_le = span_def_z - (h_a / 2) * np.cos(np.radians(theta)) - (np.cos(np.radians(rotation[i])) - 1) * (
                 h_a / 2 - shear_center)
-        dz_te = span_defz + (c_a - h_a / 2) * np.cos(np.radians(theta)) + (np.cos(np.radians(twist[i])) - 1) * (
+        dz_te = span_def_z + (c_a - h_a / 2) * np.cos(np.radians(theta)) + (np.cos(np.radians(rotation[i])) - 1) * (
                 c_a - h_a / 2 + shear_center)
         return dy_le, dy_te, dz_le, dz_te
 
 
-dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
+def get_deflections():
+    dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
+    return dy_le, dy_te, dz_le, dz_te
 
+
+def get_von_misses():
+    return v_m
