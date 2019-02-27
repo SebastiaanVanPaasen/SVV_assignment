@@ -1,6 +1,8 @@
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+
+
+# import matplotlib.pyplot as plt
 
 
 class Idealization:
@@ -118,6 +120,7 @@ class Idealization:
         """
         distance = self._calculate_boom_distance()
 
+        n_top_spar = 0
         for i in range(len(booms)):
             if booms[i][0] > self.h_a / 2:
                 n_top_spar = i
@@ -130,14 +133,14 @@ class Idealization:
         distances = distances[:n_top_spar] + [np.pi * self.h_a / 4] + distances[n_top_spar:]
 
         area_before_top_spar = ((self.t_skin * distance) / 6) * (
-                2 + (booms[n_top_spar - 2][1] / booms[n_top_spar - 1][1])) + \
-                               ((self.t_skin * (distances[n_top_spar] - distances[n_top_spar - 1])) / 6) * \
-                               (2 + (booms[n_top_spar][1] / booms[n_top_spar - 1][1]))
+                2 + (booms[n_top_spar - 2][1] / booms[n_top_spar - 1][1])) + (
+                                       (self.t_skin * (distances[n_top_spar] - distances[n_top_spar - 1])) / 6) * (
+                                       2 + (booms[n_top_spar][1] / booms[n_top_spar - 1][1]))
 
         area_after_top_spar = ((self.t_skin * distance) / 6) * (
-                2 + (booms[n_top_spar + 2][1] / booms[n_top_spar + 1][1])) + \
-                              ((self.t_skin * (distances[n_top_spar + 1] - distances[n_top_spar])) / 6) * \
-                              (2 + (booms[n_top_spar][1] / booms[n_top_spar + 1][1]))
+                2 + (booms[n_top_spar + 2][1] / booms[n_top_spar + 1][1])) + (
+                                      (self.t_skin * (distances[n_top_spar + 1] - distances[n_top_spar])) / 6) * (
+                                      2 + (booms[n_top_spar][1] / booms[n_top_spar + 1][1]))
 
         area_top_spar = ((self.t_skin * (distances[n_top_spar + 1] - distances[n_top_spar])) / 6) * \
                         (2 + (booms[n_top_spar + 1][1] / booms[n_top_spar][1])) + \
@@ -150,6 +153,7 @@ class Idealization:
 
         # print("the length of boom_areas is: " + str(len(boom_areas)))
 
+        n_bottom_spar = 0
         for i in range(len(booms)):
             if booms[i][1] < 0 and booms[i][0] < self.h_a / 2:
                 n_bottom_spar = i
@@ -163,14 +167,14 @@ class Idealization:
                                                                                       n_bottom_spar:]
 
         area_before_top_spar = ((self.t_skin * distance) / 6) * (
-                2 + (booms[n_bottom_spar - 2][1] / booms[n_bottom_spar - 1][1])) + \
-                               ((self.t_skin * (distances[n_bottom_spar] - distances[n_bottom_spar - 1])) / 6) * \
-                               (2 + (booms[n_bottom_spar][1] / booms[n_bottom_spar - 1][1]))
+                2 + (booms[n_bottom_spar - 2][1] / booms[n_bottom_spar - 1][1])) + ((self.t_skin * (
+                                        distances[n_bottom_spar] - distances[n_bottom_spar - 1])) / 6) * (
+                                       2 + (booms[n_bottom_spar][1] / booms[n_bottom_spar - 1][1]))
 
         area_after_top_spar = ((self.t_skin * distance) / 6) * (
-                2 + (booms[n_bottom_spar + 2][1] / booms[n_bottom_spar + 1][1])) + \
-                              ((self.t_skin * (distances[n_bottom_spar + 1] - distances[n_bottom_spar])) / 6) * \
-                              (2 + (booms[n_bottom_spar][1] / booms[n_bottom_spar + 1][1]))
+                2 + (booms[n_bottom_spar + 2][1] / booms[n_bottom_spar + 1][1])) + ((self.t_skin * (
+                                        distances[n_bottom_spar + 1] - distances[n_bottom_spar])) / 6) * (
+                                      2 + (booms[n_bottom_spar][1] / booms[n_bottom_spar + 1][1]))
 
         area_top_spar = ((self.t_skin * (distances[n_bottom_spar + 1] - distances[n_bottom_spar])) / 6) * \
                         (2 + (booms[n_bottom_spar + 1][1] / booms[n_bottom_spar][1])) + (
@@ -207,34 +211,6 @@ class Idealization:
             boom_areas.append(before + after + (self.stiff_area / self.n_boom))
 
         return boom_areas
-
-    # def calculate_boom_area_z(self, booms, n_top, n_bottom):
-    #     """
-    #     Calculates the area of all the booms.
-    #
-    #     :param booms: List, containing all the boom positinos in the y-z coordinate-frame.
-    #     :return: List, containing floats that represent the area of all the booms in the cross-section.
-    #     """
-    #     boom_areas = []
-    #     distance = self._calculate_boom_distance()
-    #
-    #     for i in range(len(booms)):
-    #         before = ((self.t_skin * distance) / 6) * (2 + (booms[-1 + i][0] / booms[i][0]))
-    #         # print("the ratio with the boom before: " + str(booms[-1 + i][1] / booms[i][1]))
-    #
-    #         if i == len(booms) - 1:
-    #             after = ((self.t_skin * distance) / 6) * (2 + (booms[0][0] / booms[i][0]))
-    #             # print("the final ratio equals: " + str(booms[0][1] / booms[i][1]))
-    #         else:
-    #             after = ((self.t_skin * distance) / 6) * (2 + (booms[i + 1][0] / booms[i][0]))
-    #
-    #         if i == n_top or i == n_bottom:
-    #             spar_addition = (self.t_spar * self.h_a) / 6
-    #             boom_areas.append(before + after + spar_addition)
-    #         else:
-    #             boom_areas.append(before + after + (self.stiff_area / self.n_boom))
-    #
-    #     return boom_areas
 
     @staticmethod
     def calculate_cg(pos, area):
@@ -286,7 +262,6 @@ def get_booms(n_booms):
     booms, distances = ideal.set_boom_locations()
     areas = ideal.calculate_boom_area(booms)
     boom_locations, distances, areas, top, bottom = ideal.add_spar_booms(booms, distances, areas)
-    # areas_z = ideal.calculate_boom_area_z(booms, top, bottom)
 
     return boom_locations, areas, ideal
 
@@ -314,7 +289,6 @@ def get_boom_information(n_booms):
 
     return boom_locations, distances, areas, top, bottom
 
-
 # def plotting(booms):
 #     for i in range(len(booms)):
 #         plt.scatter(booms[i][0], booms[i][1], color= 'blue', label="Cross-section")
@@ -322,4 +296,3 @@ def get_boom_information(n_booms):
 #     plt.show()
 #
 # plotting(b)
-

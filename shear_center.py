@@ -1,17 +1,26 @@
-#from SVV_assignment.SVV_assignment.geometry import *
+from SVV_assignment.SVV_assignment.geometry import *
+import numpy as np
 
-from geometry import *
+# from geometry import *
 
 
-def q_b(booms, area, moi):
-    diff_q = np.zeros(len(booms))
+def q_b(boom_locations, area, moi):
+    """
+    Calculates the base shear flow due to a dummy force of 1 N.
+
+    :param boom_locations: List of float lists, containing all the locations of the booms around the cross-section.
+    :param area: List of floats, containing the areas of all the booms around the cross-section.
+    :param moi: Float, representing the moment of inertia around the z-axis.
+    :return: List of floats, containing the base shear flows around the cross-section.
+    """
+    diff_q = np.zeros(len(boom_locations))
 
     alpha = -1 / moi
-    for i in range(len(booms)):
-        delta_q = alpha * booms[i][1] * area[i]
+    for i in range(len(boom_locations)):
+        delta_q = alpha * boom_locations[i][1] * area[i]
         diff_q[i] = delta_q
 
-    base_q = np.zeros(len(booms))
+    base_q = np.zeros(len(boom_locations))
     previous = diff_q[0]
     for i in range(1, len(diff_q)):
         base_q[i] = previous + diff_q[i]
@@ -23,6 +32,14 @@ def q_b(booms, area, moi):
 
 
 def q_s0(base_q, t, s):
+    """
+    Calculates the constant shear flow equations leaving them as unknowns in the equations.
+
+    :param base_q: List of floats, containing the base shear flows between all the booms in one cell.
+    :param t: List of floats, containing the thickness between all the booms in one cell.
+    :param s: List of floats, containing the distances between the booms in one cell.
+    :return: values for the two unknown shear flows and the numerical value due to the base shear flow.
+    """
     flow = np.multiply(base_q, s)
     flow = np.divide(flow, t)
 
@@ -34,6 +51,22 @@ def q_s0(base_q, t, s):
 
 
 def cell_separation(skin, base_q, s, n_top, n_bottom, d_spar, spar, h_a, c_a, booms):
+    """
+    Creates the cell parameters for both cells.
+
+    :param skin: Float, representing the thickness of the skin.
+    :param base_q: List of floats, representing all the base shear flows around the section.
+    :param s: List of floats, representing the circumferential positions of the booms around the section.
+    :param n_top: Integer, boom number of the boom at the top of the spar.
+    :param n_bottom: Integer, boom number of the boom at the bottom of the spar.
+    :param d_spar: Float, circumferential distance to the boom at the top of the spar.
+    :param spar: Float, representing the thickness of the spar.
+    :param h_a: Float, representing the height of the spar.
+    :param c_a: Float, representing the length of the chord.
+    :param booms: List of float lists, containing the locations of all the booms in the yz-coordinate frame.
+    :return: Two lists, containing the base shear flow, circumferential distances between booms, thickness of the
+    distances between the booms, the area of the cell and the coordinates of all the booms in the cell.
+    """
     base_q_cell_i = np.append(base_q[n_bottom + 1:], base_q[:n_top + 1])
     base_q_cell_i = np.append(base_q_cell_i, np.array([0]))
     base_q_cell_ii = np.append(base_q[n_top + 1:n_bottom + 1], np.array([0]))
@@ -151,7 +184,7 @@ def summing_moments(constants, cell_i, cell_ii, z_pos):
 # pre shear-flow calculations
 n_booms = 260
 b, boom_distances, boom_areas, top_spar, bottom_spar = get_boom_information(n_booms)
-z_pos, boom_locations = get_cg(n_booms)
+z_pos, boom_loc = get_cg(n_booms)
 
 izz, iyy = get_moi(n_booms)
 # required parameters
@@ -162,7 +195,7 @@ spar_t = 2.5 / 1000
 
 
 def get_shear_center():
-    constant, first_cell, second_cell = get_shear_flows(boom_locations, boom_areas, izz, skin_t, boom_distances,
+    constant, first_cell, second_cell = get_shear_flows(boom_loc, boom_areas, izz, skin_t, boom_distances,
                                                         top_spar,
                                                         bottom_spar, height, spar_t, chord)
 

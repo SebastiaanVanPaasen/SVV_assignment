@@ -1,7 +1,9 @@
-import math
-import numpy as np
-#from SVV_assignment.SVV_assignment.geometry import *
-from geometry import *
+# import math
+# import numpy as np
+
+from SVV_assignment.SVV_assignment.geometry import *
+# from geometry import *
+
 
 class Torque:
 
@@ -15,6 +17,16 @@ class Torque:
         self.shear_mod = 23 * 10 ** 9
 
     def create_cell_properties(self, s, n_top, n_bottom):
+        """
+        Creates the cell properties for both cells. The circumferential distance parameter s starts at the
+        bottom of the spar for the first cell and at the top of the spar for the second cell. Both going in counter
+        clockwise direction.
+
+        :param s: List of floats, the circumferential position of all the booms around the cross-section.
+        :param n_top: Integer, representing the boom number of the boom at the top of the spar.
+        :param n_bottom: Integer, representing the boom number of the boom at the bottom of the spar.
+        :return: Does not return anything, it is only used internally.
+        """
         bottom_locations = s[n_bottom:]
         top_locations = s[:n_top + 1]
 
@@ -48,6 +60,13 @@ class Torque:
         self.cell_ii.append(area_ii)
 
     def q_t(self, cell):
+        """
+        Creates the angle of twist equation for the cell that is given.
+
+        :param cell: The cell for which the equation is created.
+        :return: 1D array of floats containing the values for shear flows of both cells, the angle of twist and the
+        numerical value.
+        """
         x = np.sum(np.divide(cell[0], cell[1]))
         y = -1 * (cell[0][-1] / cell[1][-1])
         z = -2 * cell[2] * self.shear_mod
@@ -56,11 +75,22 @@ class Torque:
         return np.array([x, y, z, num])
 
     def shear_torque(self, torque):
+        """
+        Calculates the torque equation.
+        :param torque: Float, representing the torque acting on the cross-section
+        :return: 1D array of floats containing the values for the shear flows, angle of twist and the numerical value.
+        """
         torque_eq = np.array([2 * self.cell_i[2], 2 * self.cell_ii[2], 0, torque])
 
         return torque_eq
 
     def solve_system(self, torque):
+        """
+        Solves the system for the shear flow in cell 1, cell 2 and the angle of twist.
+
+        :param torque: Float, representing the torque that acts on the cross-section.
+        :return: 1D array containing the shear flows for both cells and the angle of twist.
+        """
         torque_eq = self.shear_torque(torque)
         d_theta_i = self.q_t(self.cell_i)
         d_theta_ii = self.q_t(self.cell_ii)
@@ -73,6 +103,8 @@ class Torque:
         return values
 
 
+# Simple get function to obtain the shear flows in both cells and the angle of twist.
+
 def get_torque(n_booms, m_x):
     torque = Torque()
     booms, distances, boom_areas, top, bottom = get_boom_information(n_booms)
@@ -82,6 +114,10 @@ def get_torque(n_booms, m_x):
 
     q_flow_i = final_torque_values[0]
     q_flow_ii = final_torque_values[1]
+
+    q_flow_i[-1] = q_flow_i[-1] - q_flow_ii[-1]
+    q_flow_ii[-1] = q_flow_ii[-1] - q_flow_i[-1]
+
     d_theta = final_torque_values[2]
 
     return q_flow_i, q_flow_ii, d_theta
