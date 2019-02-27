@@ -2,13 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-#from SVV_assignment.SVV_assignment.geometry import *
-#from SVV_assignment.SVV_assignment.shear_flow_distribution import *
-#from SVV_assignment.SVV_assignment.shear_center import *
+# from SVV_assignment.SVV_assignment.geometry import *
+# from SVV_assignment.SVV_assignment.shear import get_shear_flow
+# from SVV_assignment.SVV_assignment.torque import get_torque
+# from SVV_assignment.SVV_assignment.shear_center import *
 
-#from geometry import *
-#from shear_flow_distribution import *
-#from shear_center import *
+from geometry import *
+from shear_center import *
+from torque import get_torque
+from shear import get_shear_flow
 
 # aileron parameters
 l_a = 1.691
@@ -334,16 +336,54 @@ m_z = np.zeros(total_n)
 m_y = np.zeros(total_n)
 m_x = np.zeros(total_n)
 
+# ----------------------------------------------------------------------------------------------------------------------
+n_booms = 260
+# torque = torque.Torque()
+# shear = shear.Shear()
+
+cg_z, boom_locations = get_cg(n_booms)
+moi_zz, moi_yy = get_moi(n_booms)
+boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
+sc_z = get_shear_center()
+
+print("sc : " + str(sc_z))
+print("izz : " + str(moi_zz), "\n  iyy : " + str(moi_yy))
+print("boom locations : " + str(boom_locations))
+# ----------------------------------------------------------------------------------------------------------------------
+
 slice_list = []
 slice_app_force = []  # unnecessary
+twist = []
+shear_flows = []
 for i in range(total_n):
-    slice_list.append(Slice([x_slice[i], 0, 0], d_x))
+    slice_list.append(Slice([x_slice[i], 0, sc_z], d_x))
     slice_app_force.append(slice_list[i].int_dist(forces, l_a))
     v_y[i] = slice_list[i].vy
     v_z[i] = slice_list[i].vz
     m_z[i] = slice_list[i].mz
     m_y[i] = slice_list[i].my
     m_x[i] = slice_list[i].mx
+
+    flow_i_shear, flow_ii_shear, twist_shear = get_shear_flow(n_booms, v_y[i], v_z[i], [x_slice[i], 0, sc_z])
+    flow_i_torque, flow_ii_torque, twist_torque = get_torque(n_booms, m_x[i])
+
+    twist.append(twist_shear + twist_torque)
+    shear_flows.append([np.add(flow_i_shear, flow_i_torque), np.add(flow_ii_shear, flow_ii_torque)])
+
+
+
+
+
+# slice_list_global = []
+# slice_app_force_global = []  # unnecessary
+# for i in range(total_n):
+#    slice_list_global.append(Slice([x_slice[i], 0, 0], d_x))
+#    slice_app_force_global.append(slice_list_global[i].int_dist(forces_global, l_a))
+#    v_y[i] = slice_list_global[i].vy
+#    v_z[i] = slice_list_global[i].vz
+#    m_z[i] = slice_list_global[i].mz
+#    m_y[i] = slice_list_global[i].my
+#    m_x[i] = slice_list_global[i].mx
 
 
 # f1 = plt.figure()
@@ -381,13 +421,28 @@ plt.plot(x_slice,d_y)
 def absolute_def(span_defy, span_defz, twist, shear_center):
     dy_le = span_defy - h_a/2*np.sin(np.radians(theta)) - (h_a/2-shear_center[2])*np.sin(twist)
     dy_te = span_defy + (c_a-h_a/2)*np.sin(np.radians(theta)) + (c_a-h_a/2+shear_center[2])*np.sin(twist)
-    dz_le = span_defz
+    dz_le = span_defz 
     dz_te = span_defz
     return dy_le, dy_te, dz_le, dz_te
+
+def normal_stress(momenty, momentz, moi, booms_geometry):
+    sigma_x = np.zeros((len(momenty),len(booms_geometry)))
+    for i in range(len(momenty)):
+        for j in range(len(booms_geometry)):
+            sigma_x[i][j] = momenty[i]/moi[0]*booms_geometry[1] + momentz[i]/moi[1]*booms_geometry[0]
+    return sigma_x
+
+
+def von_mises_stres(normal_stress, shear_stress_1):
+    vonmis_stress = np.zeros(np.shape(normal_stress))
+    for i in range(len(normal_stress[0])):
+        for j in range(len(normal_stress[1])):
+            vonmis_stress[i][j] = np.sqrt(0.5*(normal_stress[i][j]*normal_stress[i][j])+
+                         3*shear_stress_1[i][j]*shear_stress_1[i][j])
+    return vonmis_stress
+
     
-# def normal_stress(momenty, momentz, moi, booms_geometry):
-#     for i in range(len(momenty)):
-#         for j in range(len(booms_geometry)):
-#
+
+
 
 
