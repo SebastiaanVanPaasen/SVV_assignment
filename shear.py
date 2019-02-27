@@ -1,4 +1,5 @@
-from SVV_assignment.SVV_assignment.geometry import *
+# from SVV_assignment.SVV_assignment.geometry import *
+from geometry import *
 
 
 class Shear:

@@ -1,8 +1,7 @@
 # import math
 # import numpy as np
-
-from SVV_assignment.SVV_assignment.geometry import *
-# from geometry import *
+# from SVV_assignment.SVV_assignment.geometry import *
+from geometry import *
 
 
 class Torque:

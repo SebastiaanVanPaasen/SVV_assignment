@@ -1,7 +1,7 @@
-from SVV_assignment.SVV_assignment.geometry import *
+# from SVV_assignment.SVV_assignment.geometry import *
 import numpy as np
 
-# from geometry import *
+from geometry import *
 
 
 def q_b(boom_locations, area, moi):
@@ -205,4 +205,4 @@ def get_shear_center():
 
 
 sc_z = get_shear_center()
-print(sc_z)
+# print(sc_z)
