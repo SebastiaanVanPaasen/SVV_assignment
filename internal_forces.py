@@ -362,7 +362,7 @@ def von_misses_stress(n_stress, shear_stress_1):
     von_mis_stress = np.zeros(np.shape(n_stress))
     for i in range(len(n_stress)):
         for j in range(len(n_stress[i])):
-            print(shear_stress_1[i][j])
+            print(n_stress[i][j])
             von_mis_stress[i][j] = np.sqrt(0.5 * (n_stress[i][j] * n_stress[i][j]) +
                                            3 * shear_stress_1[i][j] * shear_stress_1[i][j])
     return von_mis_stress
@@ -386,7 +386,7 @@ for i in range(total_n):
     m_x[i] = slice_list[i].mx
 
     flow_i_shear, flow_ii_shear, twist_shear, boom_loc_i, boom_loc_ii = get_shear_flow(n_booms, v_y[i], v_z[i],
-                                                                                       [x_slice[i], 0, sc_z])
+                                                                                       [x_slice[i], 0, 0])
     flow_i_torque, flow_ii_torque, twist_torque = get_torque(n_booms, m_x[i])
 
     sigma_i = normal_stress(m_y[i], m_z[i], [moi_yy, moi_zz], boom_loc_i)

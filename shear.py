@@ -1,4 +1,5 @@
 from SVV_assignment.SVV_assignment.geometry import *
+from SVV_assignment.SVV_assignment.shear_center import *
 
 
 class Shear:
@@ -193,7 +194,7 @@ class Shear:
 
         return moment
 
-    def solve_system(self, summation_point):
+    def solve_system(self, summation_point, v_y, sc_z):
         """
         Solves for the angle of twist and the constant shear flows in both cells.
 
@@ -202,7 +203,8 @@ class Shear:
         """
         moments_i = -self.sum_moments_i()
         moments_ii = - self.sum_moments_ii(summation_point)
-        total_moment = moments_i + moments_ii
+        moments_shear_force = abs(summation_point[2] - sc_z)*v_y
+        total_moment = moments_i + moments_ii + moments_shear_force
 
         moments = np.array([2 * self.cell_i[3], 2 * self.cell_ii[3], 0, total_moment])
         d_theta_i = self.d_theta(self.cell_i)
@@ -223,11 +225,12 @@ def get_shear_flow(n_booms, v_y, v_z, position):
     cg_z, boom_locations = get_cg(n_booms)
     moi_zz, moi_yy = get_moi(n_booms)
     booms, distances, boom_areas, top, bottom = get_boom_information(n_booms)
+    shear_center = get_shear_center()
 
     q_b = shear.q_b(boom_locations, boom_areas, moi_zz, moi_yy, v_y, v_z)
     cell_i, cell_ii = shear.create_cell_properties(distances, boom_locations, top, bottom, q_b)
 
-    final_shear_values = shear.solve_system(position)
+    final_shear_values = shear.solve_system(position, v_y, shear_center)
     q_base_i = np.array(cell_i[4])
     q_base_ii = np.array(cell_ii[4])
 
