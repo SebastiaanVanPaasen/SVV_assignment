@@ -421,8 +421,8 @@ plt.plot(x_slice,d_y)
 def absolute_def(span_defy, span_defz, twist, shear_center):
     dy_le = span_defy - h_a/2*np.sin(np.radians(theta)) - (h_a/2-shear_center[2])*np.sin(twist)
     dy_te = span_defy + (c_a-h_a/2)*np.sin(np.radians(theta)) + (c_a-h_a/2+shear_center[2])*np.sin(twist)
-    dz_le = span_defz 
-    dz_te = span_defz
+    dz_le = span_defz - (h_a/2)*np.cos(np.radians(theta)) - (np.cos(np.radians(theta))-1)*(h_a/2-shear_center[1])
+    dz_te = span_defz + (c_a-h_a/2)*np.cos(np.radians(theta)) + (np.cos(np.radians(theta))-1)*(c_a-h_a/2+shear_center[1])
     return dy_le, dy_te, dz_le, dz_te
 
 def normal_stress(momenty, momentz, moi, booms_geometry):

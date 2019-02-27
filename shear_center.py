@@ -143,7 +143,7 @@ def summing_moments(constants, cell_i, cell_ii, z_pos):
     moments_i = sum_moments_i(cell_i[0], constants[0][0], cell_i[4], cell_i[1], height)
     moments_ii = sum_moments_ii(cell_ii[0], constants[1][0], cell_ii[4], cell_ii[3], [height / 2, 0], chord)
 
-    z_pos_sc = z_pos - ((moments_i + moments_ii) / -1 + (height / 2))
+    z_pos_sc = ((moments_i + moments_ii) / -1)
 
     return z_pos_sc
 
