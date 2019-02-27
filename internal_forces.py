@@ -1,13 +1,15 @@
 import matplotlib.pyplot as plt
 import copy
 
-#from SVV_assignment.SVV_assignment.geometry import *
-#from SVV_assignment.SVV_assignment.shear_flow_distribution import *
-#from SVV_assignment.SVV_assignment.shear_center import *
+from SVV_assignment.SVV_assignment.geometry import *
+from SVV_assignment.SVV_assignment.shear import get_shear_flow
+from SVV_assignment.SVV_assignment.torque import get_torque
+from SVV_assignment.SVV_assignment.shear_center import *
 
-from geometry import *
-from shear_flow_distribution import *
-from shear_center import *
+# from geometry import *
+# from shear_center import *
+# from torque import get_torque
+# from shear import get_shear_flow
 
 # aileron parameters
 l_a = 1.691
@@ -335,8 +337,8 @@ m_x = np.zeros(total_n)
 
 # ----------------------------------------------------------------------------------------------------------------------
 n_booms = 260
-torque = Torque()
-shear = Shear()
+# torque = torque.Torque()
+# shear = shear.Shear()
 
 cg_z, boom_locations = get_cg(n_booms)
 moi_zz, moi_yy = get_moi(n_booms)
@@ -350,6 +352,8 @@ print("boom locations : " + str(boom_locations))
 
 slice_list = []
 slice_app_force = []  # unnecessary
+twist = []
+shear_flows = []
 for i in range(total_n):
     slice_list.append(Slice([x_slice[i], 0, sc_z], d_x))
     slice_app_force.append(slice_list[i].int_dist(forces, l_a))
@@ -359,14 +363,13 @@ for i in range(total_n):
     m_y[i] = slice_list[i].my
     m_x[i] = slice_list[i].mx
 
-    q_b = shear.q_b(boom_locations, boom_areas, moi_zz, moi_yy, v_y[i], v_z[i])
-    cell_i, cell_ii = shear.create_cell_properties(distances, boom_locations, top, bottom, q_b)
+    flow_i_shear, flow_ii_shear, twist_shear = get_shear_flow(n_booms, 100, 100, [x_slice[i], 0, sc_z])
+    flow_i_torque, flow_ii_torque, twist_torque = get_torque(n_booms, m_x[i])
 
-    final_shear = shear.solve_system([x_slice[i], 0, sc_z])
+    twist.append(twist_shear + twist_torque)
+    shear_flows.append([np.add(flow_i_shear, flow_i_torque), np.add(flow_ii_shear, flow_ii_torque)])
 
-    torque.create_cell_properties(distances, top, bottom)
-    final_torque = torque.solve_system(m_x[i])
-    
+
 
 
 
