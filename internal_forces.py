@@ -122,17 +122,17 @@ class Force:
 
 
 def calc_reaction_forces():  #THIS ONE
-    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
-    # y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
+    # y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
+    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
     y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
-    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
-    # y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
+    # y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
+    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
 
-    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
-    # z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
+    # z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
+    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
     z_2 = Force(1, np.array([0, 0, 1]), np.array([x_2, 0, 0]))
-    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
-    # z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
+    # z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
+    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
 
     a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
     a_1z = Force(1, np.array([0, 0, 1]), np.array([x_a1, y_a1, z_a1]))
@@ -272,7 +272,7 @@ def calc_reaction_forces():  #THIS ONE
             forces_resultant.append(forces[i].resultant(forces[i + 1]))
             forces_resultant_global.append(forces_global[i].resultant(forces_global[i + 1]))
 
-    return forces, forces_resultant, forces_global, forces_resultant_global, int_constant_z, int_constant_y
+    return forces, forces_resultant, forces_global, forces_resultant_global, int_constant_y, int_constant_z
 
 
 class Slice:
@@ -312,7 +312,7 @@ class Slice:
 
 forces, resultant_forces, global_forces, global_resultant_forces, int_constant_y, int_constant_z = calc_reaction_forces()
 
-d_x = 0.00001
+d_x = 0.0001
 x_slice = np.arange(0., l_a + d_x, d_x)
 total_n = len(x_slice)
 v_y = np.zeros(total_n)
@@ -322,7 +322,7 @@ m_y = np.zeros(total_n)
 m_x = np.zeros(total_n)
 
 # ----------------------------------------------------------------------------------------------------------------------
-n_booms = 260
+n_booms = 20
 cg_z, boom_locations = get_cg(n_booms)
 moi_zz, moi_yy = get_moi(n_booms)
 boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
@@ -403,8 +403,8 @@ for i in range(total_n):
 # plt.show()
 
 # deflection in y
-def eq_def_y(x, constant):
-    return 1 / (E * izz) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
+def eq_def_y(x, constant, moi):
+    return 1 / (E * moi) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                      forces[1].y * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
                                      forces[2].y * ((x - x_3) ** 3) * np.heaviside(x - x_3, 1) +
                                      forces[6].y * ((x - x_a1) ** 3) * np.heaviside(x - x_a1, 1) +
@@ -413,8 +413,8 @@ def eq_def_y(x, constant):
 
 
 # deflection in z
-def eq_def_z(x, constant):
-    return 1 / (E * iyy) * (-1 / 6 * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
+def eq_def_z(x, constant, moi):
+    return 1 / (E * moi) * (-1 / 6 * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                       forces[4].z * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
                                       forces[5].z * ((x - x_3) ** 3) * np.heaviside(x - x_3, 1) +
                                       forces[7].z * ((x - x_a1) ** 3) * np.heaviside(x - x_a1, 1) +
@@ -422,8 +422,8 @@ def eq_def_z(x, constant):
                                     x ** 4) + constant[0] * x + constant[1])
 
 
-d_y = eq_def_y(x_slice, int_constant_y)
-d_z = eq_def_z(x_slice, int_constant_z)
+d_y = eq_def_y(x_slice, int_constant_y, moi_zz)
+d_z = eq_def_z(x_slice, int_constant_z, moi_yy)
 #plt.plot(x_slice, d_z)
 #plt.plot(x_slice, d_y)
 
