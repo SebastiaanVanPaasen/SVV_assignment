@@ -449,4 +449,4 @@ def get_deflections():
 
 
 def get_von_misses():
-    return v_m
+    return v_m, boom_locations, x_slice
