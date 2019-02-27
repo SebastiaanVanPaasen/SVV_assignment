@@ -2679,27 +2679,6 @@ Element Label      Node	Label	S.Mises @Loc 1	S.Mises @Loc 2
 3210	3196	1,21E-14	1,25E-14
 3211	3196	1,21E-14	1,25E-14
 3216	3196	1,21E-14	1,25E-14
-			
-			
-Minimum		3,15E-15	4,13E-15
-At Element		1632	1631
-Node		188	2012
-			
-Maximum		4,27E-01	4,49E-01
-At Element		2745	2745
-Node		389	20
-			
-Total		373,981	379,307
-			
-			
-Field Output reported at e	lement	nodes for region: C	RJ700-1.Regi
-Computation algorithm:	EXTRAPO	LATE_COMPUTE_AVERAG	E
-Averaged at nodes			
-Averaging regions: ODB_	REGIONS		
-			
-Element Label      Node	Label	S.Mises	S.Mises
-		@Loc 1	@Loc 2
---------------------------	-------	-------------------	------------
 2030	2	2,07E-02	2,05E-02
 841	2	2,07E-02	2,05E-02
 981	3	3,22E-01	3,10E-01
@@ -4308,27 +4287,6 @@ Element Label      Node	Label	S.Mises	S.Mises
 2914	2951	1,48E-01	1,46E-01
 2910	2951	1,48E-01	1,46E-01
 2913	2951	1,48E-01	1,46E-01
-			
-			
-Minimum		1,22E-15	1,71E-15
-At Element		978	978
-Node		6	6
-			
-Maximum		3,94E-01	3,84E-01
-At Element		2839	2839
-Node		16	16
-			
-Total		217,666	216,38
-			
-			
-Field Output reported at e	lement	nodes for region: C	RJ700-1.Regi
-Computation algorithm:	EXTRAPO	LATE_COMPUTE_AVERAG	E
-Averaged at nodes			
-Averaging regions: ODB_	REGIONS		
-			
-Element Label      Node	Label	S.Mises	S.Mises
-		@Loc 1	@Loc 2
---------------------------	-------	-------------------	------------
 1	1	7,87E-04	8,85E-04
 2288	1	7,87E-04	8,85E-04
 2273	2	2,59E-03	2,66E-03
@@ -8617,27 +8575,6 @@ Element Label      Node	Label	S.Mises	S.Mises
 3170	3176	3,36E-02	3,21E-02
 3185	3176	3,36E-02	3,21E-02
 3169	3176	3,36E-02	3,21E-02
-			
-			
-Minimum		2,09E-15	1,57E-15
-At Element		2355	2355
-Node		505	505
-			
-Maximum		4,08E-01	4,26E-01
-At Element		1073	1768
-Node		317	16
-			
-Total		390,07	402,635
-			
-			
-Field Output reported at e	lement	nodes for region: C	RJ700-1.Regi
-Computation algorithm:	EXTRAPO	LATE_COMPUTE_AVERAG	E
-Averaged at nodes			
-Averaging regions: ODB_	REGIONS		
-			
-Element Label      Node	Label	S.Mises	S.Mises
-		@Loc 1	@Loc 2
---------------------------	-------	-------------------	------------
 1089	1	7,87E-04	8,85E-04
 545	1	7,87E-04	8,85E-04
 1688	4	1,07E-02	1,67E-02
