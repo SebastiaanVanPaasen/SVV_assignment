@@ -350,6 +350,12 @@ print("sc : " + str(sc_z))
 print("izz : " + str(moi_zz), "\n  iyy : " + str(moi_yy))
 print("boom locations : " + str(boom_locations))
 # ----------------------------------------------------------------------------------------------------------------------
+def normal_stress(momenty, momentz, moi, booms_geometry):
+    sigma_x = np.zeros((len(momenty),len(booms_geometry)))
+    for i in range(len(momenty)):
+        for j in range(len(booms_geometry)):
+            sigma_x[i][j] = momenty[i]/moi[0]*booms_geometry[1] + momentz[i]/moi[1]*booms_geometry[0]
+    return sigma_x
 
 slice_list = []
 slice_app_force = []  # unnecessary
@@ -372,18 +378,6 @@ for i in range(total_n):
 
 
 
-
-
-# slice_list_global = []
-# slice_app_force_global = []  # unnecessary
-# for i in range(total_n):
-#    slice_list_global.append(Slice([x_slice[i], 0, 0], d_x))
-#    slice_app_force_global.append(slice_list_global[i].int_dist(forces_global, l_a))
-#    v_y[i] = slice_list_global[i].vy
-#    v_z[i] = slice_list_global[i].vz
-#    m_z[i] = slice_list_global[i].mz
-#    m_y[i] = slice_list_global[i].my
-#    m_x[i] = slice_list_global[i].mx
 
 
 # f1 = plt.figure()
