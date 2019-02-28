@@ -116,7 +116,7 @@ class Force:
         return term
 
 
-def calc_reaction_forces():  #THIS ONE
+def calc_reaction_forces():  # THIS ONE
     # y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
     y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
     y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
@@ -136,7 +136,8 @@ def calc_reaction_forces():  #THIS ONE
     p_z = Force(abs(p * np.cos(np.radians(theta))), np.array([0, 0, -1]), np.array([x_a2, y_a1, z_a1]))
     q_y = Force(abs(q * np.cos(np.radians(theta)) * l_a), np.array([0, -1, 0]),
                 np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
-    q_z = Force(abs(q * np.sin(np.radians(theta)) * l_a), np.array([0, 0, 1]), np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
+    q_z = Force(abs(q * np.sin(np.radians(theta)) * l_a), np.array([0, 0, 1]),
+                np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
 
     forces = [y_1, y_2, y_3, z_1, z_2, z_3, a_1y, a_1z, p_y, p_z, q_y, q_z]
 
@@ -324,9 +325,11 @@ moi_zz, moi_yy = get_moi(n_booms)
 boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
 sc_z = get_shear_center()
 
-print("sc with respect to the middle of the spar : " + str(sc_z))
+print("sc with respect to the middle of the spar : " + str(sc_z * -1))
 print("izz : " + str(moi_zz))
 print("iyy : " + str(moi_yy))
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -405,6 +408,24 @@ for i in range(total_n):
 # plt.show()
 
 # deflection in y
+def plotting():
+    to_plot = [v_z, v_y, m_z, m_y, m_x]
+    y_labels = ["shear force in z-direction [N]", "shear force in y-direction [N]", "moment in z-direction [Nm]",
+                "moment in y-direction [Nm]", "torque [Nm]"]
+
+    for i in range(len(to_plot)):
+        plt.figure(i+1)
+        plt.plot(x_slice, to_plot[i], color="blue")
+        plt.xlabel("span wise location [mm]")
+        plt.ylabel(y_labels[i])
+        # plt.savefig(y_labels[i])
+
+    plt.show()
+
+
+plotting()
+
+
 def eq_def_y(x, constant, moi):
     return 1 / (E * moi) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                      forces[1].y * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
@@ -426,11 +447,11 @@ def eq_def_z(x, constant, moi):
 
 d_y = eq_def_y(x_slice, int_constant_y, moi_zz)
 d_z = eq_def_z(x_slice, int_constant_z, moi_yy)
-#plt.plot(x_slice, d_z)
-#plt.plot(x_slice, d_y)
+# plt.plot(x_slice, d_z)
+# plt.plot(x_slice, d_y)
 
-d_y_global = d_y*np.cos(np.radians(theta))-d_z*np.sin(np.radians(theta))
-d_z_global = d_y*np.sin(np.radians(theta))+d_z*np.cos(np.radians(theta))
+d_y_global = d_y * np.cos(np.radians(theta)) - d_z * np.sin(np.radians(theta))
+d_z_global = d_y * np.sin(np.radians(theta)) + d_z * np.cos(np.radians(theta))
 
 
 def absolute_def_global(span_def_y, span_def_z, rotation, shear_center):
@@ -456,23 +477,22 @@ def absolute_def_local(span_def_y, span_def_z, rotation, shear_center):
         return dy_le, dy_te, dz_le, dz_te
 
 
+dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
+
+
 def get_deflections():
     dy_le, dy_te, dz_le, dz_te = absolute_def_local(d_y, d_z, twist, sc_z)
     return dy_le, dy_te, dz_le, dz_te
 
 
-def get_deflections_global():
-    dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def_global(d_y_global, d_z_global, twist, sc_z)    
-    return dy_le_global, dy_te_global, dz_le_global, dz_te_global
+dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
 
+dy_le_g2 = dy_le * np.cos(np.radians(theta)) - dz_le * np.sin(np.radians(theta))
+dz_le_g2 = dy_le * np.sin(np.radians(theta)) + dz_le * np.cos(np.radians(theta))
 
-#dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
-#
-#dy_le_g2 = dy_le*np.cos(np.radians(theta))-dz_le*np.sin(np.radians(theta))
-#dz_le_g2 = dy_le*np.sin(np.radians(theta))+dz_le*np.cos(np.radians(theta))
-#
-#dy_te_g2 = dy_te*np.cos(np.radians(theta))-dz_te*np.sin(np.radians(theta))
-#dz_te_g2 = dy_te*np.sin(np.radians(theta))+dz_te*np.cos(np.radians(theta))
+dy_te_g2 = dy_te * np.cos(np.radians(theta)) - dz_te * np.sin(np.radians(theta))
+dz_te_g2 = dy_te * np.sin(np.radians(theta)) + dz_te * np.cos(np.radians(theta))
+
 
 def get_von_misses():
     return v_m, boom_locations, x_slice
