@@ -2,11 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 
-# from SVV_assignment.SVV_assignment.geometry import *
-# from SVV_assignment.SVV_assignment.shear import get_shear_flow
-# from SVV_assignment.SVV_assignment.torque import get_torque
-# from SVV_assignment.SVV_assignment.shear_center import *
-
 from geometry import *
 from shear_center import *
 from torque import get_torque

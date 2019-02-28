@@ -1,6 +1,3 @@
-from SVV_assignment.SVV_assignment.geometry import *
-import numpy as np
-
 from geometry import *
 
 
