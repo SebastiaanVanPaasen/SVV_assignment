@@ -117,16 +117,16 @@ class Force:
 
 
 def calc_reaction_forces():  #THIS ONE
-    # y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
+#    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
     y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
     y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
-    # y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
+#    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
     y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
 
-    # z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
+#    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
     z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
     z_2 = Force(1, np.array([0, 0, 1]), np.array([x_2, 0, 0]))
-    # z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
+#    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
     z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
 
     a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
@@ -389,8 +389,12 @@ for i in range(total_n):
 
     v_m.append(von_misses_stress(sigma[i], shear_stress_yz[i]))
     
-    if abs((x_slice[i] - x_1))<1e-9 or abs((x_slice[i] - x_a1))<1e-9 or abs((x_slice[i]-x_a2))<1e-9 or abs((x_slice[i]-x_3))<1e-9:
-        shear_rib.append(get_shear_flow_rib(v_z[i],v_y[i], np.array([0,h_a/2]), np.array([0,-h_a/2]), np.array([-(c_a-h_a/2),0])))
+    for j in range(len(x_rib)):
+        if abs((x_slice[i] - x_rib[j])<1e-9):
+            shear_rib.append(get_shear_flow_rib(v_z[i],v_y[i], np.array([0,h_a/2]), np.array([0,-h_a/2]), np.array([-(c_a-h_a/2),0])))
+            
+#    if abs((x_slice[i] - x_1))<1e-9 or abs((x_slice[i] - x_a1))<1e-9 or abs((x_slice[i]-x_a2))<1e-9 or abs((x_slice[i]-x_3))<1e-9:
+#        shear_rib.append(get_shear_flow_rib(v_z[i],v_y[i], np.array([0,h_a/2]), np.array([0,-h_a/2]), np.array([-(c_a-h_a/2),0])))
 
 
 # print("the twist : " + str(twist))
@@ -404,7 +408,7 @@ for i in range(total_n):
 # plt.plot(x_slice, m_y)
 # plt.show()
 
-# deflection in y
+# deflection in y due to bending
 def eq_def_y(x, constant, moi):
     return 1 / (E * moi) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                      forces[1].y * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
@@ -414,7 +418,7 @@ def eq_def_y(x, constant, moi):
                                     x ** 4) + constant[0] * x + constant[1])
 
 
-# deflection in z
+# deflection in z due to bending
 def eq_def_z(x, constant, moi):
     return 1 / (E * moi) * (-1 / 6 * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                       forces[4].z * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
@@ -426,8 +430,6 @@ def eq_def_z(x, constant, moi):
 
 d_y = eq_def_y(x_slice, int_constant_y, moi_zz)
 d_z = eq_def_z(x_slice, int_constant_z, moi_yy)
-#plt.plot(x_slice, d_z)
-#plt.plot(x_slice, d_y)
 
 d_y_global = d_y*np.cos(np.radians(theta))-d_z*np.sin(np.radians(theta))
 d_z_global = d_y*np.sin(np.radians(theta))+d_z*np.cos(np.radians(theta))
