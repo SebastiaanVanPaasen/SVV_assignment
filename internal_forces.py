@@ -466,7 +466,6 @@ def get_deflections_global():
     return dy_le_global, dy_te_global, dz_le_global, dz_te_global
 
 
-
 #dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
 #
 #dy_le_g2 = dy_le*np.cos(np.radians(theta))-dz_le*np.sin(np.radians(theta))
@@ -477,3 +476,5 @@ def get_deflections_global():
 
 def get_von_misses():
     return v_m, boom_locations, x_slice
+
+get_von_misses()
