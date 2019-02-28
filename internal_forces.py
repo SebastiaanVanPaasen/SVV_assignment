@@ -322,13 +322,13 @@ m_y = np.zeros(total_n)
 m_x = np.zeros(total_n)
 
 # ----------------------------------------------------------------------------------------------------------------------
-n_booms = 20
+n_booms = 26
 cg_z, boom_locations = get_cg(n_booms)
 moi_zz, moi_yy = get_moi(n_booms)
 boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
 sc_z = get_shear_center()
 
-print("sc : " + str(sc_z))
+print("sc with respect to the middle of the spar : " + str(sc_z))
 print("izz : " + str(moi_zz))
 print("iyy : " + str(moi_yy))
 # ----------------------------------------------------------------------------------------------------------------------
@@ -349,7 +349,7 @@ def von_misses_stress(n_stress, shear_stress_1):
         for j in range(len(n_stress[i])):
             # print(shear_stress_1[i][j])
             von_mis[j] = np.sqrt(0.5 * (n_stress[i][j] * n_stress[i][j]) +
-                                           3 * shear_stress_1[i][j] * shear_stress_1[i][j])
+                                 3 * shear_stress_1[i][j] * shear_stress_1[i][j])
         von_mis_stress.append(von_mis)
     return von_mis_stress
 
@@ -431,17 +431,22 @@ d_y_global = d_y*np.cos(np.radians(theta))-d_z*np.sin(np.radians(theta))
 d_z_global = d_y*np.sin(np.radians(theta))+d_z*np.cos(np.radians(theta))
 
 
-def absolute_def(span_defy, span_defz, twist, shear_center):
-    for i in range(len(twist)):
-        dy_le = span_defy - h_a / 2 * np.sin(np.radians(theta)) - (h_a / 2 - shear_center) * np.sin(twist[i])
-        dy_te = span_defy + (c_a - h_a / 2) * np.sin(np.radians(theta)) + (c_a - h_a / 2 + shear_center) * np.sin(twist[i])
-        dz_le = span_defz - (h_a / 2) * np.cos(np.radians(theta)) - (np.cos(np.radians(twist[i])) - 1) * (
+def absolute_def(span_def_y, span_def_z, rotation, shear_center):
+    for i in range(len(rotation)):
+        dy_le = span_def_y - h_a / 2 * np.sin(np.radians(theta)) - (h_a / 2 - shear_center) * np.sin(rotation[i])
+        dy_te = span_def_y + (c_a - h_a / 2) * np.sin(np.radians(theta)) + (c_a - h_a / 2 + shear_center) * np.sin(
+            rotation[i])
+        dz_le = span_def_z - (h_a / 2) * np.cos(np.radians(theta)) - (np.cos(np.radians(rotation[i])) - 1) * (
                 h_a / 2 - shear_center)
-        dz_te = span_defz + (c_a - h_a / 2) * np.cos(np.radians(theta)) + (np.cos(np.radians(twist[i])) - 1) * (
+        dz_te = span_def_z + (c_a - h_a / 2) * np.cos(np.radians(theta)) + (np.cos(np.radians(rotation[i])) - 1) * (
                 c_a - h_a / 2 + shear_center)
         return dy_le, dy_te, dz_le, dz_te
 
 dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
+
+def get_deflections():
+    dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
+    return dy_le, dy_te, dz_le, dz_te
 
 dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
 
@@ -450,3 +455,6 @@ dz_le_g2 = dy_le*np.sin(np.radians(theta))+dz_le*np.cos(np.radians(theta))
 
 dy_te_g2 = dy_te*np.cos(np.radians(theta))-dz_te*np.sin(np.radians(theta))
 dz_te_g2 = dy_te*np.sin(np.radians(theta))+dz_te*np.cos(np.radians(theta))
+
+def get_von_misses():
+    return v_m, boom_locations, x_slice
