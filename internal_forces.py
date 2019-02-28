@@ -427,6 +427,9 @@ d_z = eq_def_z(x_slice, int_constant_z, moi_yy)
 #plt.plot(x_slice, d_z)
 #plt.plot(x_slice, d_y)
 
+d_y_global = d_y*np.cos(np.radians(theta))-d_z*np.sin(np.radians(theta))
+d_z_global = d_y*np.sin(np.radians(theta))+d_z*np.cos(np.radians(theta))
+
 
 def absolute_def(span_defy, span_defz, twist, shear_center):
     for i in range(len(twist)):
@@ -438,6 +441,12 @@ def absolute_def(span_defy, span_defz, twist, shear_center):
                 c_a - h_a / 2 + shear_center)
         return dy_le, dy_te, dz_le, dz_te
 
-
 dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
 
+dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
+
+dy_le_g2 = dy_le*np.cos(np.radians(theta))-dz_le*np.sin(np.radians(theta))
+dz_le_g2 = dy_le*np.sin(np.radians(theta))+dz_le*np.cos(np.radians(theta))
+
+dy_te_g2 = dy_te*np.cos(np.radians(theta))-dz_te*np.sin(np.radians(theta))
+dz_te_g2 = dy_te*np.sin(np.radians(theta))+dz_te*np.cos(np.radians(theta))
