@@ -10,7 +10,7 @@ import copy
 from geometry import *
 from shear_center import *
 from torque import get_torque
-from shear import get_shear_flow
+from shear import get_shear_flow, get_shear_flow_rib
 
 # aileron parameters
 l_a = 1.691
@@ -29,10 +29,10 @@ x_end = 1.691
 # actuator distances
 theta = 26  # degrees
 x_a = 0.272
-x_a1 = x_2 - x_a / 2
+x_a1 = 0.418 #x_2 - x_a / 2.
 y_a1 = h_a / 2  # np.cos(np.radians(h_a / 2 - np.tan(np.radians(theta)) * h_a / 2))
 z_a1 = h_a / 2  # np.cos(np.radians(theta)) * h_a / 2 + np.sin(np.radians(theta)) * h_a / 2
-x_a2 = x_2 + x_a / 2
+x_a2 = 0.69 #x_2 + x_a / 2.
 
 # load parameters
 q = 2710
@@ -321,6 +321,7 @@ m_z = np.zeros(total_n)
 m_y = np.zeros(total_n)
 m_x = np.zeros(total_n)
 
+
 # ----------------------------------------------------------------------------------------------------------------------
 n_booms = 26
 cg_z, boom_locations = get_cg(n_booms)
@@ -362,6 +363,9 @@ shear_stress_yz = []
 shear_stress_xy = []
 sigma = []
 v_m = []
+shear_rib = []
+x_rib = np.array([x_1,x_a1,x_a2,x_3])
+
 for i in range(total_n):
     slice_list.append(Slice([x_slice[i], 0, sc_z], d_x))
     slice_app_force.append(slice_list[i].int_dist(forces, l_a))
@@ -389,6 +393,9 @@ for i in range(total_n):
     shear_stress_yz[i][1][-1] = shear_stress_yz[i][1][-1] * t_skin / t_spar
 
     v_m.append(von_misses_stress(sigma[i], shear_stress_yz[i]))
+    
+    if abs((x_slice[i] - x_1))<1e-9 or abs((x_slice[i] - x_a1))<1e-9 or abs((x_slice[i]-x_a2))<1e-9 or abs((x_slice[i]-x_3))<1e-9:
+        shear_rib.append(get_shear_flow_rib(v_z[i],v_y[i], np.array([0,h_a/2]), np.array([0,-h_a/2]), np.array([-(c_a-h_a/2),0])))
 
 
 # print("the twist : " + str(twist))
@@ -431,7 +438,7 @@ d_y_global = d_y*np.cos(np.radians(theta))-d_z*np.sin(np.radians(theta))
 d_z_global = d_y*np.sin(np.radians(theta))+d_z*np.cos(np.radians(theta))
 
 
-def absolute_def(span_def_y, span_def_z, rotation, shear_center):
+def absolute_def_global(span_def_y, span_def_z, rotation, shear_center):
     for i in range(len(rotation)):
         dy_le = span_def_y - h_a / 2 * np.sin(np.radians(theta)) - (h_a / 2 - shear_center) * np.sin(rotation[i])
         dy_te = span_def_y + (c_a - h_a / 2) * np.sin(np.radians(theta)) + (c_a - h_a / 2 + shear_center) * np.sin(
@@ -441,20 +448,37 @@ def absolute_def(span_def_y, span_def_z, rotation, shear_center):
         dz_te = span_def_z + (c_a - h_a / 2) * np.cos(np.radians(theta)) + (np.cos(np.radians(rotation[i])) - 1) * (
                 c_a - h_a / 2 + shear_center)
         return dy_le, dy_te, dz_le, dz_te
+    
+def absolute_def_local(span_def_y, span_def_z, rotation, shear_center):
+    for i in range(len(rotation)):
+        dy_le = span_def_y - (h_a / 2 - shear_center) * np.sin(rotation[i])
+        dy_te = span_def_y + (c_a - h_a / 2 + shear_center) * np.sin(
+            rotation[i])
+        dz_le = span_def_z - (np.cos(np.radians(rotation[i])) - 1) * (
+                h_a / 2 - shear_center)
+        dz_te = span_def_z + (np.cos(np.radians(rotation[i])) - 1) * (
+                c_a - h_a / 2 + shear_center)
+        return dy_le, dy_te, dz_le, dz_te
 
-dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
 
 def get_deflections():
-    dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
+    dy_le, dy_te, dz_le, dz_te = absolute_def_local(d_y, d_z, twist, sc_z)
     return dy_le, dy_te, dz_le, dz_te
 
-dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
 
-dy_le_g2 = dy_le*np.cos(np.radians(theta))-dz_le*np.sin(np.radians(theta))
-dz_le_g2 = dy_le*np.sin(np.radians(theta))+dz_le*np.cos(np.radians(theta))
+def get_deflections_global():
+    dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def_global(d_y_global, d_z_global, twist, sc_z)    
+    return dy_le_global, dy_te_global, dz_le_global, dz_te_global
 
-dy_te_g2 = dy_te*np.cos(np.radians(theta))-dz_te*np.sin(np.radians(theta))
-dz_te_g2 = dy_te*np.sin(np.radians(theta))+dz_te*np.cos(np.radians(theta))
+
+
+#dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
+#
+#dy_le_g2 = dy_le*np.cos(np.radians(theta))-dz_le*np.sin(np.radians(theta))
+#dz_le_g2 = dy_le*np.sin(np.radians(theta))+dz_le*np.cos(np.radians(theta))
+#
+#dy_te_g2 = dy_te*np.cos(np.radians(theta))-dz_te*np.sin(np.radians(theta))
+#dz_te_g2 = dy_te*np.sin(np.radians(theta))+dz_te*np.cos(np.radians(theta))
 
 def get_von_misses():
     return v_m, boom_locations, x_slice
