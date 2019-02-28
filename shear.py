@@ -1,5 +1,5 @@
-# from SVV_assignment.SVV_assignment.geometry import *
-# from SVV_assignment.SVV_assignment.shear_center import *
+from geometry import *
+from shear_center import *
 
 from geometry import *
 from shear_center import *
