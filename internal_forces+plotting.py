@@ -6,6 +6,7 @@ from geometry import *
 from shear_center import *
 from torque import get_torque
 from shear import get_shear_flow, get_shear_flow_rib
+from analmodvals import *
 
 # aileron parameters
 l_a = 1.691
@@ -116,18 +117,18 @@ class Force:
         return term
 
 
-def calc_reaction_forces(moiy, moiz):  #THIS ONE
-    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
-#    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
+def calc_reaction_forces():  # THIS ONE
+    # y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
+    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
     y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
-    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
-#    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
+    # y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
+    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
 
-    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
-#    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
+    # z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
+    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
     z_2 = Force(1, np.array([0, 0, 1]), np.array([x_2, 0, 0]))
-    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
-#    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
+    # z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
+    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
 
     a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
     a_1z = Force(1, np.array([0, 0, 1]), np.array([x_a1, y_a1, z_a1]))
@@ -136,7 +137,8 @@ def calc_reaction_forces(moiy, moiz):  #THIS ONE
     p_z = Force(abs(p * np.cos(np.radians(theta))), np.array([0, 0, -1]), np.array([x_a2, y_a1, z_a1]))
     q_y = Force(abs(q * np.cos(np.radians(theta)) * l_a), np.array([0, -1, 0]),
                 np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
-    q_z = Force(abs(q * np.sin(np.radians(theta)) * l_a), np.array([0, 0, 1]), np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
+    q_z = Force(abs(q * np.sin(np.radians(theta)) * l_a), np.array([0, 0, 1]),
+                np.array([l_a / 2, 0, h_a / 2 - 0.25 * c_a]))
 
     forces = [y_1, y_2, y_3, z_1, z_2, z_3, a_1y, a_1z, p_y, p_z, q_y, q_z]
 
@@ -164,7 +166,7 @@ def calc_reaction_forces(moiy, moiz):  #THIS ONE
                                 0.,
                                 6 * qy / 24 * (x_1 ** 4),
                                 0.,
-                                -E * moiz * 6 * delta_1y])
+                                -E * izz * 6 * delta_1y])
 
     defl_y2 = 1 / 6 * np.array([(x_2 - x_1) ** 3 * np.heaviside(x_2 - x_1, 1),
                                 (x_2 - x_2) ** 3 * np.heaviside(x_2 - x_2, 1),
@@ -189,7 +191,7 @@ def calc_reaction_forces(moiy, moiz):  #THIS ONE
                                 0.,
                                 6 * qy / 24 * (x_3 ** 4),
                                 0.,
-                                -E * moiz * 6 * delta_3y])
+                                -E * izz * 6 * delta_3y])
 
     defl_z1 = 1 / 6 * np.array([0., 0., 0.,
                                 -(x_1 - x_1) ** 3 * np.heaviside(x_1 - x_1, 1),
@@ -202,7 +204,7 @@ def calc_reaction_forces(moiy, moiz):  #THIS ONE
                                 -forces[9].z * ((x_1 - x_a2) ** 3) * np.heaviside(x_1 - x_a2, 1),
                                 0.,
                                 -6 * qz / 24 * (x_1 ** 4),
-                                -E * moiy * 6 * delta_1z])
+                                -E * iyy * 6 * delta_1z])
 
     defl_z2 = 1 / 6 * np.array([0., 0., 0.,
                                 -(x_2 - x_1) ** 3 * np.heaviside(x_2 - x_1, 1),
@@ -228,7 +230,7 @@ def calc_reaction_forces(moiy, moiz):  #THIS ONE
                                 -forces[9].z * ((x_3 - x_a2) ** 3) * np.heaviside(x_3 - x_a2, 1),
                                 0.,
                                 -6 * qz / 24 * (x_3 ** 4),
-                                -E * moiy * 6 * delta_3z])
+                                -E * iyy * 6 * delta_3z])
 
     trig = np.zeros(16)
     trig[6] = np.cos(np.radians(theta))
@@ -305,8 +307,9 @@ class Slice:
 
 # def distribution(forces, bc1, bc2, l_a, dx):
 
+forces, resultant_forces, global_forces, global_resultant_forces, int_constant_y, int_constant_z = calc_reaction_forces()
 
-d_x = 0.001
+d_x = 0.0001
 x_slice = np.arange(0., l_a + d_x, d_x)
 total_n = len(x_slice)
 v_y = np.zeros(total_n)
@@ -330,7 +333,6 @@ print("iyy : " + str(moi_yy))
 
 # ----------------------------------------------------------------------------------------------------------------------
 
-forces, resultant_forces, global_forces, global_resultant_forces, int_constant_y, int_constant_z = calc_reaction_forces(iyy, izz)
 
 def normal_stress(moment_y, moment_z, moi, booms_geometry):
     sigma_x = np.zeros((len(booms_geometry)))
@@ -361,9 +363,7 @@ shear_stress_xy = []
 sigma = []
 v_m = []
 shear_rib = []
-x_rib = np.array([0,x_1,x_a1,x_a2,x_3,l_a])
-twist_shear_array = np.zeros(total_n)
-twist_torque_array = np.zeros(total_n)
+x_rib = np.array([x_1,x_a1,x_a2,x_3])
 
 for i in range(total_n):
     slice_list.append(Slice([x_slice[i], 0, sc_z], d_x))
@@ -377,8 +377,6 @@ for i in range(total_n):
     flow_i_shear, flow_ii_shear, twist_shear, boom_loc_i, boom_loc_ii = get_shear_flow(n_booms, v_y[i], v_z[i],
                                                                                        [x_slice[i], 0, 0])
     flow_i_torque, flow_ii_torque, twist_torque = get_torque(n_booms, m_x[i])
-    twist_shear_array[i] = twist_shear
-    twist_torque_array[i] = twist_torque
 
     sigma_i = normal_stress(m_y[i], m_z[i], [moi_yy, moi_zz], boom_loc_i)
     sigma_ii = normal_stress(m_y[i], m_z[i], [moi_yy, moi_zz], boom_loc_ii)
@@ -409,31 +407,56 @@ for i in range(total_n):
 # f2 = plt.figure()
 # plt.plot(x_slice, m_y)
 # plt.show()
+xlocan, vzan, vyan, tan, myan, mzan = analmodvals()
+analmodlist= [vzan, vyan, mzan,myan,tan]
+
+# deflection in y
+def plotting():
+    to_plot = [v_z, v_y, m_z, m_y, m_x]
+    y_labels = ["shear force in z-direction [kN]", "shear force in y-direction [kN]", "moment in z-direction [kNm]",
+                "moment in y-direction [kNm]", "torque [kNm]"]
+
+    for i in range(len(to_plot)):
+        plt.figure(i+1)
+        plt.plot(x_slice, to_plot[i]/1000,'b',xlocan, analmodlist[i]/1000,'r')
+        plt.xlabel("span wise location [mm]")
+        plt.ylabel(y_labels[i])
+        plt.gca().legend(('Numerical model','Analytical model'))
+        # plt.savefig(y_labels[i])
+
+    plt.show()
+
+#plt.plot(x_slice,v_y/1000,'r',xlocan,vyan/1000,'b')
+#plt.xlabel('Span wise x location [m]')
+#plt.ylabel('V_y [N]')
+#plt.gca().legend(('Numerical model','Analytical model'))
+#
+plotting()
 
 
-# deflection in y due to bending
 def eq_def_y(x, constant, moi):
-    return ((1 / (E * moi)) * ((1 / 6) * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
+    return 1 / (E * moi) * (1 / 6 * (forces[0].y * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                      forces[1].y * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
                                      forces[2].y * ((x - x_3) ** 3) * np.heaviside(x - x_3, 1) +
                                      forces[6].y * ((x - x_a1) ** 3) * np.heaviside(x - x_a1, 1) +
-                                     forces[8].y * ((x - x_a2) ** 3) * np.heaviside(x - x_a2, 1)) + (qy / 24) * (
-                                    x ** 4) + constant[0] * x + constant[1]))
+                                     forces[8].y * ((x - x_a2) ** 3) * np.heaviside(x - x_a2, 1)) + qy / 24 * (
+                                    x ** 4) + constant[0] * x + constant[1])
 
 
-# deflection in z due to bending
+# deflection in z
 def eq_def_z(x, constant, moi):
-    return ((1 / (E * moi)) * ((-1 / 6) * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
+    return 1 / (E * moi) * (-1 / 6 * (forces[3].z * ((x - x_1) ** 3) * np.heaviside(x - x_1, 1) +
                                       forces[4].z * ((x - x_2) ** 3) * np.heaviside(x - x_2, 1) +
                                       forces[5].z * ((x - x_3) ** 3) * np.heaviside(x - x_3, 1) +
                                       forces[7].z * ((x - x_a1) ** 3) * np.heaviside(x - x_a1, 1) +
-                                      forces[9].z * ((x - x_a2) ** 3) * np.heaviside(x - x_a2, 1)) - (qz / 24) * (
-                                    x ** 4) + constant[0] * x + constant[1]))
+                                      forces[9].z * ((x - x_a2) ** 3) * np.heaviside(x - x_a2, 1)) - qz / 24 * (
+                                    x ** 4) + constant[0] * x + constant[1])
 
 
-d_y = eq_def_y(x_slice, int_constant_y, izz)
-d_z = eq_def_z(x_slice, int_constant_z, iyy)
-
+d_y = eq_def_y(x_slice, int_constant_y, moi_zz)
+d_z = eq_def_z(x_slice, int_constant_z, moi_yy)
+# plt.plot(x_slice, d_z)
+# plt.plot(x_slice, d_y)
 
 d_y_global = d_y * np.cos(np.radians(theta)) - d_z * np.sin(np.radians(theta))
 d_z_global = d_y * np.sin(np.radians(theta)) + d_z * np.cos(np.radians(theta))
@@ -462,7 +485,7 @@ def absolute_def_local(span_def_y, span_def_z, rotation, shear_center):
         return dy_le, dy_te, dz_le, dz_te
 
 
-dy_le, dy_te, dz_le, dz_te = absolute_def_local(d_y, d_z, twist, sc_z)
+dy_le, dy_te, dz_le, dz_te = absolute_def(d_y, d_z, twist, sc_z)
 
 
 def get_deflections():
@@ -470,9 +493,7 @@ def get_deflections():
     return dy_le, dy_te, dz_le, dz_te
 
 
-def get_deflections_global():
-    dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def_global(d_y_global, d_z_global, twist, sc_z)
-    return dy_le_global, dy_te_global, dz_le_global, dz_te_global
+dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
 
 dy_le_g2 = dy_le * np.cos(np.radians(theta)) - dz_le * np.sin(np.radians(theta))
 dz_le_g2 = dy_le * np.sin(np.radians(theta)) + dz_le * np.cos(np.radians(theta))
@@ -484,29 +505,6 @@ dz_te_g2 = dy_te * np.sin(np.radians(theta)) + dz_te * np.cos(np.radians(theta))
 def get_von_misses():
     return v_m, boom_locations, x_slice
 
-
-def get_def():
-    for i in range(total_n):
-        for j in range(len(x_rib)):
-            if abs(x_slice[i]-x_rib[j]) < 1e-6:
-                print('x = ', x_slice[i], 'deflection y local bending = ', d_y[i])
-                print('x = ', x_slice[i], 'deflection z local bending = ', d_z[i], '\n')
-            
-    
-get_def()
 get_von_misses()
 
-def plotting():
-    to_plot = [v_z, v_y, m_z, m_y, m_x, d_y, d_z]
-    y_labels = ["shear force in z-direction [N]", "shear force in y-direction [N]", "moment in z-direction [Nm]",
-                "moment in y-direction [Nm]", "torque [Nm]", "deflection in y [m]", "deflection in z [m]"]
-
-    for i in range(len(to_plot)):
-        plt.figure(i+1)
-        plt.plot(x_slice, to_plot[i], color="blue")
-        plt.xlabel("span wise location [m]")
-        plt.ylabel(y_labels[i])
-        # plt.savefig(y_labels[i])
-
-    plt.show()
 

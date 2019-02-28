@@ -4,6 +4,8 @@ from shear_center import *
 from geometry import *
 from shear_center import *
 
+import numpy as np
+
 
 class Shear:
 
@@ -248,7 +250,7 @@ def get_shear_flow(n_booms, v_y, v_z, position):
 
 def get_shear_flow_rib(vz, vy, upper_flange, lower_flange, trailing_edge_flange):  #z,y
     angle = np.arctan(upper_flange[1]/(upper_flange[0]-trailing_edge_flange[0]))
-    area = (upper_flange[1])*(upper_flange[0]-trailing_edge_flange[0])
+    area = (upper_flange[1])*(upper_flange[0]-trailing_edge_flange[0]) #+ upper_flange[1]*upper_flange[1]*np.pi
     length = np.sqrt(upper_flange[1]*upper_flange[1] + trailing_edge_flange[0]*trailing_edge_flange[0])
     sys_mat = np.array(([np.cos(angle)*length*np.cos(angle), -np.cos(angle)*length*np.cos(angle), 0],
                         [np.sin(angle)*length*np.sin(angle), np.sin(angle)*length*np.sin(angle), -(upper_flange[1]-lower_flange[1])],
