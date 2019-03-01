@@ -474,6 +474,7 @@ def get_deflections():
     dy_le, dy_te, dz_le, dz_te = absolute_def_local(d_y, d_z, twist, sc_z)
     return dy_le, dy_te, dz_le, dz_te
 
+dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def_global(d_y_global, d_z_global, twist, sc_z)
 
 def get_deflections_global():
     dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def_global(d_y_global, d_z_global, twist, sc_z)
@@ -485,6 +486,13 @@ dz_le_g2 = dy_le * np.sin(np.radians(theta)) + dz_le * np.cos(np.radians(theta))
 dy_te_g2 = dy_te * np.cos(np.radians(theta)) - dz_te * np.sin(np.radians(theta))
 dz_te_g2 = dy_te * np.sin(np.radians(theta)) + dz_te * np.cos(np.radians(theta))
 
+#dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
+#
+#dy_le_g2 = dy_le*np.cos(np.radians(theta))-dz_le*np.sin(np.radians(theta))
+#dz_le_g2 = dy_le*np.sin(np.radians(theta))+dz_le*np.cos(np.radians(theta))
+#
+#dy_te_g2 = dy_te*np.cos(np.radians(theta))-dz_te*np.sin(np.radians(theta))
+#dz_te_g2 = dy_te*np.sin(np.radians(theta))+dz_te*np.cos(np.radians(theta))
 
 def get_von_misses():
     return v_m, boom_locations, x_slice
