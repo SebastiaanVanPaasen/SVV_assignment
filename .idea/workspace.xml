@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f1e5ce6b-1d3c-40d7-a8c7-1d6c0c6a9844" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal_forces+plotting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analmodvals.py" beforeDir="false" afterPath="$PROJECT_DIR$/analmodvals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal_forces.py" beforeDir="false" afterPath="$PROJECT_DIR$/internal_forces.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shear.py" beforeDir="false" afterPath="$PROJECT_DIR$/shear.py" afterDir="false" />
-    </list>
+    <list default="true" id="f1e5ce6b-1d3c-40d7-a8c7-1d6c0c6a9844" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -35,7 +29,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/internal_forces.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="8704">
+            <state relative-caret-position="4158">
               <caret line="512" lean-forward="true" selection-start-line="512" selection-end-line="512" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
@@ -140,7 +134,7 @@
       <updated>1551199280577</updated>
       <workItem from="1551349671150" duration="3564000" />
       <workItem from="1551359771613" duration="1939000" />
-      <workItem from="1551386282771" duration="1034000" />
+      <workItem from="1551386282771" duration="1081000" />
     </task>
     <task id="LOCAL-00001" summary="weird workspace stuff I still don't understand">
       <created>1551386353849</created>
@@ -149,12 +143,12 @@
       <option name="project" value="LOCAL" />
       <updated>1551386353849</updated>
     </task>
-    <task id="LOCAL-00002" summary="Merge branch 'master' of https://github.com/Sebas4558944/SVV_assignment&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;shear_center.py">
-      <created>1551359782115</created>
+    <task id="LOCAL-00002" summary="Merge branch 'master' of https://github.com/Sebas4558944/SVV_assignment&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;internal_forces.py">
+      <created>1551396739771</created>
       <option name="number" value="00002" />
       <option name="presentableId" value="LOCAL-00002" />
       <option name="project" value="LOCAL" />
-      <updated>1551359782115</updated>
+      <updated>1551396739771</updated>
     </task>
     <task id="LOCAL-00003" summary="Merge branch 'master' of https://github.com/Sebas4558944/SVV_assignment&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;shear_center.py">
       <created>1551360407458</created>
@@ -170,17 +164,16 @@
       <option name="project" value="LOCAL" />
       <updated>1551386196214</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1016000" />
+    <option name="totallyTimeSpent" value="1063000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="878" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13691275" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13691275" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -191,7 +184,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="8" visible="true" weight="0.3297587" />
+      <window_info active="true" anchor="bottom" id="Version Control" order="8" visible="true" weight="0.3297587" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Terminal" order="11" />
@@ -231,7 +224,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="weird workspace stuff I still don't understand" />
-    <option name="LAST_COMMIT_MESSAGE" value="weird workspace stuff I still don't understand" />
+    <MESSAGE value="Merge branch 'master' of https://github.com/Sebas4558944/SVV_assignment&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;internal_forces.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'master' of https://github.com/Sebas4558944/SVV_assignment&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;internal_forces.py" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/validation.py">
@@ -272,7 +266,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/internal_forces.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8704">
+        <state relative-caret-position="4158">
           <caret line="512" lean-forward="true" selection-start-line="512" selection-end-line="512" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />

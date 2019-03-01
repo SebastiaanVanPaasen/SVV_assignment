@@ -248,14 +248,14 @@ def get_shear_flow(n_booms, v_y, v_z, position):
     return q_flow_i, q_flow_ii, final_shear_values[2], cell_i[2], cell_ii[2]
 
 
-def get_shear_flow_rib(vz, vy, upper_flange, lower_flange, trailing_edge_flange):  #z,y
+def get_shear_flow_rib(vz, vy, mx, upper_flange, lower_flange, trailing_edge_flange):  #z,y
     angle = np.arctan(upper_flange[1]/(upper_flange[0]-trailing_edge_flange[0]))
-    area = (upper_flange[1])*(upper_flange[0]-trailing_edge_flange[0]) #+ upper_flange[1]*upper_flange[1]*np.pi
+    area = 0.5*upper_flange[1]*upper_flange[1]*np.pi #(upper_flange[1])*(upper_flange[0]-trailing_edge_flange[0])
     length = np.sqrt(upper_flange[1]*upper_flange[1] + trailing_edge_flange[0]*trailing_edge_flange[0])
     sys_mat = np.array(([np.cos(angle)*length*np.cos(angle), -np.cos(angle)*length*np.cos(angle), 0],
                         [np.sin(angle)*length*np.sin(angle), np.sin(angle)*length*np.sin(angle), -(upper_flange[1]-lower_flange[1])],
-                        [2*area, 0, 0]))
-    sys_vec = np.array(([-vz],[-vy],[-vz*upper_flange[1]]))
+                        [0, 0, 2*area]))
+    sys_vec = np.array(([-vz],[-vy],[vy*(-trailing_edge_flange[0])-mx]))
     rib_shear = np.linalg.solve(sys_mat, sys_vec)
     return rib_shear
 
