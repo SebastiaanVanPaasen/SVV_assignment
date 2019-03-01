@@ -1,4 +1,4 @@
-# from SVV_assignment.SVV_assignment.geometry import *
+from geometry import *
 import numpy as np
 
 from geometry import *

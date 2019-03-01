@@ -117,17 +117,17 @@ class Force:
 
 
 def calc_reaction_forces(moiy, moiz):  #THIS ONE
-#    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
-    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
+    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
+#    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
     y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
-#    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
-    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
+    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
+#    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
 
-#    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
-    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
+    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
+#    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
     z_2 = Force(1, np.array([0, 0, 1]), np.array([x_2, 0, 0]))
-#    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
-    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
+    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
+#    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
 
     a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
     a_1z = Force(1, np.array([0, 0, 1]), np.array([x_a1, y_a1, z_a1]))
@@ -306,7 +306,7 @@ class Slice:
 # def distribution(forces, bc1, bc2, l_a, dx):
 
 
-d_x = 0.0001
+d_x = 0.001
 x_slice = np.arange(0., l_a + d_x, d_x)
 total_n = len(x_slice)
 v_y = np.zeros(total_n)
@@ -323,7 +323,7 @@ moi_zz, moi_yy = get_moi(n_booms)
 boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
 sc_z = get_shear_center()
 
-print("sc with respect to the middle of the spar : " + str(sc_z * -1))
+print("sc with respect to the middle of the spar : " + str(sc_z))
 print("izz : " + str(moi_zz))
 print("iyy : " + str(moi_yy))
 

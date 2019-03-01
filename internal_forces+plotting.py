@@ -118,17 +118,17 @@ class Force:
 
 
 def calc_reaction_forces():  # THIS ONE
-    # y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
-    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
+    y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, 0, 0]))
+    #y_1 = Force(1, np.array([0, 1, 0]), np.array([x_1, delta_1y, delta_1z]))
     y_2 = Force(1, np.array([0, 1, 0]), np.array([x_2, 0, 0]))
-    # y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
-    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
+    y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, 0, 0]))
+    #y_3 = Force(1, np.array([0, 1, 0]), np.array([x_3, delta_3y, delta_3z]))
 
-    # z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
-    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
+    z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, 0, 0]))
+    #z_1 = Force(1, np.array([0, 0, 1]), np.array([x_1, delta_1y, delta_1z]))
     z_2 = Force(1, np.array([0, 0, 1]), np.array([x_2, 0, 0]))
-    # z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
-    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
+    z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, 0, 0]))
+    #z_3 = Force(1, np.array([0, 0, 1]), np.array([x_3, delta_3y, delta_3z]))
 
     a_1y = Force(1, np.array([0, 1, 0]), np.array([x_a1, y_a1, z_a1]))
     a_1z = Force(1, np.array([0, 0, 1]), np.array([x_a1, y_a1, z_a1]))
