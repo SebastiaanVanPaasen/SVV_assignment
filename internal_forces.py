@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 import copy
 
 from geometry import *
+from shear import get_shear_flow
+from torque import get_torque
+from shear_center import *
+
+from geometry import *
 from shear_center import *
 from torque import get_torque
 from shear import get_shear_flow, get_shear_flow_rib
@@ -306,7 +311,7 @@ class Slice:
 # def distribution(forces, bc1, bc2, l_a, dx):
 
 
-d_x = 0.001
+d_x = 0.01
 x_slice = np.arange(0., l_a + d_x, d_x)
 total_n = len(x_slice)
 v_y = np.zeros(total_n)
@@ -323,11 +328,9 @@ moi_zz, moi_yy = get_moi(n_booms)
 boom_pos, distances, boom_areas, top, bottom = get_boom_information(n_booms)
 sc_z = get_shear_center()
 
-print("sc with respect to the middle of the spar : " + str(sc_z * -1))
+print("sc with respect to the middle of the spar : " + str(sc_z))
 print("izz : " + str(moi_zz))
 print("iyy : " + str(moi_yy))
-
-
 # ----------------------------------------------------------------------------------------------------------------------
 
 forces, resultant_forces, global_forces, global_resultant_forces, int_constant_y, int_constant_z = calc_reaction_forces(iyy, izz)
@@ -461,6 +464,7 @@ def absolute_def_local(span_def_y, span_def_z, rotation, shear_center):
                 c_a - h_a / 2 + shear_center)
         return dy_le, dy_te, dz_le, dz_te
 
+dy_le, dy_te, dz_le, dz_te = absolute_def_local(d_y, d_z, twist, sc_z)
 
 dy_le, dy_te, dz_le, dz_te = absolute_def_local(d_y, d_z, twist, sc_z)
 
@@ -469,44 +473,21 @@ def get_deflections():
     dy_le, dy_te, dz_le, dz_te = absolute_def_local(d_y, d_z, twist, sc_z)
     return dy_le, dy_te, dz_le, dz_te
 
+dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def_global(d_y_global, d_z_global, twist, sc_z)
 
 def get_deflections_global():
-    dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def_global(d_y_global, d_z_global, twist, sc_z)
+    dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def_global(d_y_global, d_z_global, twist, sc_z)    
     return dy_le_global, dy_te_global, dz_le_global, dz_te_global
 
-dy_le_g2 = dy_le * np.cos(np.radians(theta)) - dz_le * np.sin(np.radians(theta))
-dz_le_g2 = dy_le * np.sin(np.radians(theta)) + dz_le * np.cos(np.radians(theta))
 
-dy_te_g2 = dy_te * np.cos(np.radians(theta)) - dz_te * np.sin(np.radians(theta))
-dz_te_g2 = dy_te * np.sin(np.radians(theta)) + dz_te * np.cos(np.radians(theta))
 
+#dy_le_global, dy_te_global, dz_le_global, dz_te_global = absolute_def(d_y_global, d_z_global, twist, sc_z)
+#
+#dy_le_g2 = dy_le*np.cos(np.radians(theta))-dz_le*np.sin(np.radians(theta))
+#dz_le_g2 = dy_le*np.sin(np.radians(theta))+dz_le*np.cos(np.radians(theta))
+#
+#dy_te_g2 = dy_te*np.cos(np.radians(theta))-dz_te*np.sin(np.radians(theta))
+#dz_te_g2 = dy_te*np.sin(np.radians(theta))+dz_te*np.cos(np.radians(theta))
 
 def get_von_misses():
     return v_m, boom_locations, x_slice
-
-
-def get_def():
-    for i in range(total_n):
-        for j in range(len(x_rib)):
-            if abs(x_slice[i]-x_rib[j]) < 1e-6:
-                print('x = ', x_slice[i], 'deflection y local bending = ', d_y[i])
-                print('x = ', x_slice[i], 'deflection z local bending = ', d_z[i], '\n')
-            
-    
-get_def()
-get_von_misses()
-
-def plotting():
-    to_plot = [v_z, v_y, m_z, m_y, m_x, d_y, d_z]
-    y_labels = ["shear force in z-direction [N]", "shear force in y-direction [N]", "moment in z-direction [Nm]",
-                "moment in y-direction [Nm]", "torque [Nm]", "deflection in y [m]", "deflection in z [m]"]
-
-    for i in range(len(to_plot)):
-        plt.figure(i+1)
-        plt.plot(x_slice, to_plot[i], color="blue")
-        plt.xlabel("span wise location [m]")
-        plt.ylabel(y_labels[i])
-        # plt.savefig(y_labels[i])
-
-    plt.show()
-
